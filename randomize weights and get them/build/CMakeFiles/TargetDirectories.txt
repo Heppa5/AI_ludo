@@ -1,0 +1,3 @@
+/home/jesper/Fann/Fun/build/CMakeFiles/edit_cache.dir
+/home/jesper/Fann/Fun/build/CMakeFiles/rebuild_cache.dir
+/home/jesper/Fann/Fun/build/CMakeFiles/Tutorial.dir

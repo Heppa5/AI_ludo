@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jesper/Fann/Fun/simple_test.cpp
+stdio.h
+-
+iostream
+-
+floatfann.h
+/home/jesper/Fann/Fun/floatfann.h
+fann.h
+/home/jesper/Fann/Fun/fann.h
+

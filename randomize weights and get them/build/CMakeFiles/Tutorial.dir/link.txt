@@ -1,0 +1,1 @@
+/usr/bin/c++    -std=c++11   CMakeFiles/Tutorial.dir/simple_test.cpp.o  -o Tutorial -rdynamic -lfann 
