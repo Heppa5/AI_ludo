@@ -26,4 +26,6 @@ HEADERS  += dialog.h \
 
 FORMS    += dialog.ui
 
+LIBS += -lfann
+
 QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -Wunused

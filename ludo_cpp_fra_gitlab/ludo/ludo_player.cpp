@@ -7,6 +7,13 @@ ludo_player::ludo_player():
     dice_roll(0)
 {
 }
+ludo_player::ludo_player(struct fann *neunet):
+    pos_start_of_turn(16),
+    pos_end_of_turn(16),
+    dice_roll(0)
+{
+    ann=neunet;
+}
 
 int ludo_player::make_decision(){
     if(dice_roll == 6){
@@ -33,6 +40,13 @@ int ludo_player::make_decision(){
         }
     }
     return -1;
+}
+
+
+void ludo_player::set_weights(struct fann_connection* weights, int num_weights)
+{
+    con=weights;
+    fann_set_weight_array(ann,con,num_weights);
 }
 
 void ludo_player::start_turn(positions_and_dice relative){
