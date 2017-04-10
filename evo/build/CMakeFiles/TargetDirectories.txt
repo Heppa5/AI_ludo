@@ -1,0 +1,3 @@
+/home/jesper/AI_ludo/evo/build/CMakeFiles/edit_cache.dir
+/home/jesper/AI_ludo/evo/build/CMakeFiles/rebuild_cache.dir
+/home/jesper/AI_ludo/evo/build/CMakeFiles/Tutorial.dir

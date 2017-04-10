@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jesper/AI_ludo/evo/main.cpp
+stdio.h
+-
+iostream
+-
+floatfann.h
+/home/jesper/AI_ludo/evo/floatfann.h
+fann.h
+/home/jesper/AI_ludo/evo/fann.h
+
