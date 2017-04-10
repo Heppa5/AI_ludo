@@ -60,6 +60,7 @@ signals:
     void set_color(int);
     void set_dice_result(int);
     void declare_winner(int);
+	void close();
 
 public slots:
     void turnComplete(bool win);
