@@ -6,6 +6,8 @@
 #include "floatfann.h"
 #include "fann.h"
 
+using namespace std;
+
 class ludo_player : public QObject {
     Q_OBJECT
 private:

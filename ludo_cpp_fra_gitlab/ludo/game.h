@@ -36,6 +36,8 @@ private:
             QThread::msleep(msecs);
         }
     }
+
+    int winner;
 public:
     int color;
     std::vector<int> player_positions;
@@ -46,6 +48,7 @@ public:
     int getDiceRoll() {return dice_result; }
     game();
     void setGameDelay(unsigned int mili_seconds){ game_delay = mili_seconds; }
+    int return_winner();
     void reset();
 signals:
     void player1_start(positions_and_dice);

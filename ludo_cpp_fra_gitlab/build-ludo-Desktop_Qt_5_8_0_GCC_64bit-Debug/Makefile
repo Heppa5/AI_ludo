@@ -215,6 +215,7 @@ DIST          = ../../../Qt/5.8/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../Qt/5.8/gcc_64/mkspecs/features/qt_config.prf \
 		../../../Qt/5.8/gcc_64/mkspecs/linux-g++/qmake.conf \
 		../../../Qt/5.8/gcc_64/mkspecs/features/spec_post.prf \
+		../ludo/.qmake.stash \
 		../../../Qt/5.8/gcc_64/mkspecs/features/exclusive_builds.prf \
 		../../../Qt/5.8/gcc_64/mkspecs/features/toolchain.prf \
 		../../../Qt/5.8/gcc_64/mkspecs/features/default_pre.prf \
@@ -238,7 +239,8 @@ DIST          = ../../../Qt/5.8/gcc_64/mkspecs/features/spec_pre.prf \
 		../ludo/game.h \
 		../ludo/ludo_player.h \
 		../ludo/positions_and_dice.h \
-		../ludo/ludo_player_random.h ../ludo/main.cpp \
+		../ludo/ludo_player_random.h \
+		../ludo/individual.h ../ludo/main.cpp \
 		../ludo/dialog.cpp \
 		../ludo/game.cpp \
 		../ludo/ludo_player.cpp \
@@ -404,6 +406,7 @@ Makefile: ../ludo/ludo.pro ../../../Qt/5.8/gcc_64/mkspecs/linux-g++/qmake.conf .
 		../../../Qt/5.8/gcc_64/mkspecs/features/qt_config.prf \
 		../../../Qt/5.8/gcc_64/mkspecs/linux-g++/qmake.conf \
 		../../../Qt/5.8/gcc_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../../Qt/5.8/gcc_64/mkspecs/features/exclusive_builds.prf \
 		../../../Qt/5.8/gcc_64/mkspecs/features/toolchain.prf \
 		../../../Qt/5.8/gcc_64/mkspecs/features/default_pre.prf \
@@ -578,6 +581,7 @@ Makefile: ../ludo/ludo.pro ../../../Qt/5.8/gcc_64/mkspecs/linux-g++/qmake.conf .
 ../../../Qt/5.8/gcc_64/mkspecs/features/qt_config.prf:
 ../../../Qt/5.8/gcc_64/mkspecs/linux-g++/qmake.conf:
 ../../../Qt/5.8/gcc_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 ../../../Qt/5.8/gcc_64/mkspecs/features/exclusive_builds.prf:
 ../../../Qt/5.8/gcc_64/mkspecs/features/toolchain.prf:
 ../../../Qt/5.8/gcc_64/mkspecs/features/default_pre.prf:
@@ -616,7 +620,7 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../../../Qt/5.8/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../ludo/dialog.h ../ludo/game.h ../ludo/ludo_player.h ../ludo/positions_and_dice.h ../ludo/ludo_player_random.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../ludo/dialog.h ../ludo/game.h ../ludo/ludo_player.h ../ludo/positions_and_dice.h ../ludo/ludo_player_random.h ../ludo/individual.h $(DISTDIR)/
 	$(COPY_FILE) --parents ../ludo/main.cpp ../ludo/dialog.cpp ../ludo/game.cpp ../ludo/ludo_player.cpp ../ludo/ludo_player_random.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents ../ludo/dialog.ui $(DISTDIR)/
 
@@ -1949,7 +1953,38 @@ dialog.o: ../ludo/dialog.cpp ../ludo/dialog.h \
 		../../../Qt/5.8/gcc_64/include/QtWidgets/QGraphicsEllipseItem \
 		../../../Qt/5.8/gcc_64/include/QtWidgets/qgraphicsitem.h \
 		../../../Qt/5.8/gcc_64/include/QtGui/QPixmap \
-		ui_dialog.h
+		ui_dialog.h \
+		../../../Qt/5.8/gcc_64/include/QtCore/QVariant \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/QAction \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qaction.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qactiongroup.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/QApplication \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qapplication.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qdesktopwidget.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/QButtonGroup \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qbuttongroup.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/QGraphicsView \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qgraphicsview.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qscrollarea.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qabstractscrollarea.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qframe.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/QHBoxLayout \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qboxlayout.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qlayout.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qlayoutitem.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qgridlayout.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/QHeaderView \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qheaderview.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qabstractitemview.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qstyleoption.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qslider.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qabstractslider.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qstyle.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qtabbar.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qtabwidget.h \
+		../../../Qt/5.8/gcc_64/include/QtWidgets/qrubberband.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o dialog.o ../ludo/dialog.cpp
 
 game.o: ../ludo/game.cpp ../ludo/game.h \
