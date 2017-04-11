@@ -142,23 +142,61 @@ int main(int argc, char *argv[]){
                    con2[i].to_neuron, con2[i].weight);
         }
     }
-
+    QApplication a(argc, argv);
+    qRegisterMetaType<positions_and_dice>();
     // Jesper Adding code end
 
     // ######################## Setting up game #######################################
-    //QApplication a(argc, argv);
-    //qRegisterMetaType<positions_and_dice>();
+    for(int i = 0; i < 10000; ++i){
+
+    //instanciate the players here
+    //ludo_player p1;
+    ludo_player_random  p2,p3, p4;
+
+    game g;
+    g.setGameDelay(000); //if you want to see the game, set a delay
+
+    // Add a GUI <-- remove the '/' to uncomment block
+   /* Dialog w;
+    QObject::connect(&g,SIGNAL(update_graphics(std::vector<int>)),&w,SLOT(update_graphics(std::vector<int>)));
+    QObject::connect(&g,SIGNAL(set_color(int)),                   &w,SLOT(get_color(int)));
+    QObject::connect(&g,SIGNAL(set_dice_result(int)),             &w,SLOT(get_dice_result(int)));
+    QObject::connect(&g,SIGNAL(declare_winner(int)),              &w,SLOT(get_winner()));
+    QObject::connect(&g,SIGNAL(close()),&a,SLOT(quit()));
+    w.show();*/
+    // //Or don't add the GUI
+    QObject::connect(&g,SIGNAL(close()),&a,SLOT(quit()));
+    //*/
+
+    //set up for each player
+    QObject::connect(&g, SIGNAL(player1_start(positions_and_dice)),&p1,SLOT(start_turn(positions_and_dice)));
+    QObject::connect(&p1,SIGNAL(select_piece(int)),                &g, SLOT(movePiece(int)));
+    QObject::connect(&g, SIGNAL(player1_end(std::vector<int>)),    &p1,SLOT(post_game_analysis(std::vector<int>)));
+    QObject::connect(&p1,SIGNAL(turn_complete(bool)),              &g, SLOT(turnComplete(bool)));
+
+    QObject::connect(&g, SIGNAL(player2_start(positions_and_dice)),&p2,SLOT(start_turn(positions_and_dice)));
+    QObject::connect(&p2,SIGNAL(select_piece(int)),                &g, SLOT(movePiece(int)));
+    QObject::connect(&g, SIGNAL(player2_end(std::vector<int>)),    &p2,SLOT(post_game_analysis(std::vector<int>)));
+    QObject::connect(&p2,SIGNAL(turn_complete(bool)),              &g, SLOT(turnComplete(bool)));
+
+    QObject::connect(&g, SIGNAL(player3_start(positions_and_dice)),&p3,SLOT(start_turn(positions_and_dice)));
+    QObject::connect(&p3,SIGNAL(select_piece(int)),                &g, SLOT(movePiece(int)));
+    QObject::connect(&g, SIGNAL(player3_end(std::vector<int>)),    &p3,SLOT(post_game_analysis(std::vector<int>)));
+    QObject::connect(&p3,SIGNAL(turn_complete(bool)),              &g, SLOT(turnComplete(bool)));
+
+    QObject::connect(&g, SIGNAL(player4_start(positions_and_dice)),&p4,SLOT(start_turn(positions_and_dice)));
+    QObject::connect(&p4,SIGNAL(select_piece(int)),                &g, SLOT(movePiece(int)));
+    QObject::connect(&g, SIGNAL(player4_end(std::vector<int>)),    &p4,SLOT(post_game_analysis(std::vector<int>)));
+    QObject::connect(&p4,SIGNAL(turn_complete(bool)),              &g, SLOT(turnComplete(bool)));
+
+    // ############################ END OF SETTING UP GAME ############################################
+
+    // Jesper adding code
     bool done=false;
     int generation=1;
-    while (done==false){
-        //instanciate the players here
-        //ludo_player p1;
-
-
-        // ############################ END OF SETTING UP GAME ############################################
-
-        // Jesper adding code
-
+    p1.set_weights(population[0].con,connum);
+   /* while (done==false)
+    {
         cout << "##########################Evaluation - generation: " << generation << " ############################" << endl;
         // evaluation of population
         for (int i=0 ; i<population.size();i++)
@@ -167,71 +205,31 @@ int main(int argc, char *argv[]){
             p1.set_weights(population[i].con,connum);
             for(int j=0 ; j < number_of_games_per_individual ; j++)
             {
-                QApplication a(argc, argv);
-                qRegisterMetaType<positions_and_dice>();
-                ludo_player_random  p2,p3, p4;
-
-                game g;
-                g.setGameDelay(000); //if you want to see the game, set a delay
-
-                // Add a GUI <-- remove the '/' to uncomment block
-               /* Dialog w;
-                QObject::connect(&g,SIGNAL(update_graphics(std::vector<int>)),&w,SLOT(update_graphics(std::vector<int>)));
-                QObject::connect(&g,SIGNAL(set_color(int)),                   &w,SLOT(get_color(int)));
-                QObject::connect(&g,SIGNAL(set_dice_result(int)),             &w,SLOT(get_dice_result(int)));
-                QObject::connect(&g,SIGNAL(declare_winner(int)),              &w,SLOT(get_winner()));
-                QObject::connect(&g,SIGNAL(close()),&a,SLOT(quit()));
-                w.show();*/
-                // //Or don't add the GUI
-                QObject::connect(&g,SIGNAL(close()),&a,SLOT(quit()));
-                //*/
-
-                //set up for each player
-                QObject::connect(&g, SIGNAL(player1_start(positions_and_dice)),&p1,SLOT(start_turn(positions_and_dice)));
-                QObject::connect(&p1,SIGNAL(select_piece(int)),                &g, SLOT(movePiece(int)));
-                QObject::connect(&g, SIGNAL(player1_end(std::vector<int>)),    &p1,SLOT(post_game_analysis(std::vector<int>)));
-                QObject::connect(&p1,SIGNAL(turn_complete(bool)),              &g, SLOT(turnComplete(bool)));
-
-                QObject::connect(&g, SIGNAL(player2_start(positions_and_dice)),&p2,SLOT(start_turn(positions_and_dice)));
-                QObject::connect(&p2,SIGNAL(select_piece(int)),                &g, SLOT(movePiece(int)));
-                QObject::connect(&g, SIGNAL(player2_end(std::vector<int>)),    &p2,SLOT(post_game_analysis(std::vector<int>)));
-                QObject::connect(&p2,SIGNAL(turn_complete(bool)),              &g, SLOT(turnComplete(bool)));
-
-                QObject::connect(&g, SIGNAL(player3_start(positions_and_dice)),&p3,SLOT(start_turn(positions_and_dice)));
-                QObject::connect(&p3,SIGNAL(select_piece(int)),                &g, SLOT(movePiece(int)));
-                QObject::connect(&g, SIGNAL(player3_end(std::vector<int>)),    &p3,SLOT(post_game_analysis(std::vector<int>)));
-                QObject::connect(&p3,SIGNAL(turn_complete(bool)),              &g, SLOT(turnComplete(bool)));
-
-                QObject::connect(&g, SIGNAL(player4_start(positions_and_dice)),&p4,SLOT(start_turn(positions_and_dice)));
-                QObject::connect(&p4,SIGNAL(select_piece(int)),                &g, SLOT(movePiece(int)));
-                QObject::connect(&g, SIGNAL(player4_end(std::vector<int>)),    &p4,SLOT(post_game_analysis(std::vector<int>)));
-                QObject::connect(&p4,SIGNAL(turn_complete(bool)),              &g, SLOT(turnComplete(bool)));
-                for(int j= 0; j< 10000 ; j++)
-                {}
-
+                cout << "start" << endl;
                 g.start();
+                cout << "exec" << endl;
                 a.exec();
-                while (a.closingDown()){
-                    cout << "Hej" << endl;
-                }
+                cout << "done" << endl;
                 if (g.return_winner() == 0)
                     population[i].evaluation++;
+                cout << "reset" << endl;
                 g.reset();
-
+                cout << "has resat" << endl;
             }
-            cout << "Individual " << i << " got an evaluation of " << population[i].evaluation << endl;
+            //cout << "Individual " << i << " got an evaluation of " << population[i].evaluation << endl;
         }
         generation++;
+    }*/
 
 
-
-
-
-        /*g.start();
+    
+        g.start();
         a.exec();
-        a.exit();
+        for(int j = 0; j< 2000 ; j++)
+        {
+        }
         cout << "Winner is: " << g.return_winner() << " Turn " << i <<endl;
-        g.reset();*/
+        g.reset();
     }
     return 0;
 }
