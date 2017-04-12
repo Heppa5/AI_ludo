@@ -21,8 +21,8 @@ private:
     unsigned int game_delay;
     positions_and_dice relative;
     int dice_result;
-    std::random_device rd;
-    std::mt19937 gen;
+    //std::random_device rd;
+    std::random_device gen;
     std::vector<int> relativePosition();
     int isStar(int index);
     bool isGlobe(int index);

@@ -16,6 +16,7 @@ private:
     int dice_roll;
     int make_decision();
 
+    int star[8]={5,11,18,24,31,37,44,50};
     struct fann_connection *con;
     struct fann *ann;
 public:

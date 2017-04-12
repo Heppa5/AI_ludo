@@ -15,7 +15,7 @@ ludo_player::ludo_player(struct fann *neunet):
     ann=neunet;
 }
 
-int ludo_player::make_decision(){
+/*int ludo_player::make_decision(){
     if(dice_roll == 6){
         for(int i = 0; i < 4; ++i){
             if(pos_start_of_turn[i]<0){
@@ -40,18 +40,20 @@ int ludo_player::make_decision(){
         }
     }
     return -1;
-}
+}*/
 
-/*int ludo_player::make_decision(){
+int ludo_player::make_decision(){
     int num_input=fann_get_num_input(ann);
-    fann_type input[5];
+    fann_type input[17];
     fann_type *calc_out;
     bool debug=false;
     // Fill up input
     if(debug)
         cout << "The dice is: " << dice_roll << endl;
+
     for(int i=0; i<4 ;i++) // 4 opponents
     {
+
         if(debug)
             cout << "The position of piece " << i << " is: " << pos_start_of_turn[i] << endl;
         if(pos_start_of_turn[i]==-1)
@@ -61,7 +63,83 @@ int ludo_player::make_decision(){
         else // if in goal then set it to zero
             input[i]=0;
     }
-    input[num_input-1]=dice_roll;
+    int offset=4;
+
+    for(int i=offset; i<offset+4;i++)
+    {
+        if (pos_start_of_turn[i-offset]!=-1 && pos_start_of_turn[i-offset]!=99)
+        {
+            int dist=99;
+            for (int j=4; j<pos_start_of_turn.size() ; j++) // check for the other players pieces
+            {
+                if (pos_start_of_turn[j]!=-1 && pos_start_of_turn[j]!=99 && pos_start_of_turn[j]> pos_start_of_turn[i-offset] &&pos_start_of_turn[j]-pos_start_of_turn[i-offset]<dist )
+                    dist=(pos_start_of_turn[j]-pos_start_of_turn[i-offset]);
+            }
+            if(dist!=99)
+                input[i]=dist/55;
+            else
+                input[i]=0;
+        }
+        else
+        {
+            input[i]=0;
+        }
+    }
+    // check for closest star
+    offset=8;
+    for(int i=0; i<4;i++)
+    {
+        int j=0;
+        bool done=false;
+        while(done==false)
+        {
+            if(pos_start_of_turn[i]<star[j])
+            {
+                input[i+offset]=(star[j]-pos_start_of_turn[i])/7;
+                done=true;
+            }
+            else if(j>=8)
+            {
+                done=true;
+            }
+            else
+            {
+                input[i+offset]=0;
+            }
+            j++;
+        }
+    }
+
+    // check for closest globe
+    offset=12;
+    for( int i= 0; i< 4 ; i++)
+    {
+        if(pos_start_of_turn[i]!=-1 && pos_start_of_turn[i]<52)
+        {
+            int j=pos_start_of_turn[i];
+            bool done=false;
+            while(done==false)
+            {
+                if(j>=52)
+                {
+                    done=true;
+                    input[i+offset]=0;
+                }
+                else if(j % 13 == 0 || (j - 8) % 13 == 0 )
+                {
+                    input[i+offset]=(j-pos_start_of_turn[i]/8);
+                    done=true;
+                }
+                j++;
+            }
+        }
+        else
+        {
+            input[i+offset]=0;
+        }
+    }
+
+    input[16]=dice_roll/6;
     // Calculate output
     calc_out =fann_run(ann,input);
 
@@ -90,7 +168,7 @@ int ludo_player::make_decision(){
         return 3;
     }
     return -1;
-}*/
+}
 void ludo_player::set_weights(struct fann_connection* weights, int num_weights)
 {
     con=weights;
@@ -99,6 +177,11 @@ void ludo_player::set_weights(struct fann_connection* weights, int num_weights)
 
 void ludo_player::start_turn(positions_and_dice relative){
     pos_start_of_turn = relative.pos;
+    /*cout << "Test" << endl;
+    for(int i=0 ; i< pos_start_of_turn.size();i++)
+    {
+        cout << pos_start_of_turn[i] << " , ";
+    }*/
     dice_roll = relative.dice;
     int decision = make_decision();
     emit select_piece(decision);

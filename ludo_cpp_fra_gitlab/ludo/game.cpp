@@ -7,8 +7,9 @@ game::game():
     game_delay(1000),
     relative(),
     dice_result(1),
-    rd(),
-    gen(rd()),
+   // rd(),
+    //gen(rd()),
+   // gen();
     color(3),
     player_positions({-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1})
 {
@@ -65,6 +66,7 @@ bool game::isGlobe(int index){
         }
     }
     return false;
+
 }
 
 void game::send_them_home(int index){
