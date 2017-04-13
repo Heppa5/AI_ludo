@@ -13,6 +13,8 @@ iostream
 -
 floatfann.h
 /home/jesper/AI_ludo/evo/floatfann.h
+fann_cpp.h
+-
 fann.h
 /home/jesper/AI_ludo/evo/fann.h
 

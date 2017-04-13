@@ -71,7 +71,8 @@ int main()
         printf("weight from %u to %u: %f\n", con[i].from_neuron,
                con[i].to_neuron, con[i].weight);
     }
-
+    
+    fann_print_connections(ann);
     free(con);
     
     
