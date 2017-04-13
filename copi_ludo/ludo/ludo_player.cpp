@@ -51,13 +51,6 @@ int ludo_player::make_decision(){
     if(debug)
         cout << "The dice is: " << dice_roll << endl;
 
-    // setting all to zero at first
-    for (int i=0 ; i<17 ; i++)
-    {
-        input[i]=0;
-    }
-
-
     for(int i=0; i<4 ;i++) // 4 opponents
     {
 
@@ -146,14 +139,29 @@ int ludo_player::make_decision(){
         }
     }
 
-
-
     input[16]=dice_roll;
     // Calculate output
     calc_out =fann_run(ann,input);
-    if(calc_out[0]>1 || calc_out[0]<(-1))
-        cout << "###### Dont trust fann ###########" << endl;
+    cout << "############################### MOVE GETTING DECIDED ###############################" << endl;
+    cout << "Piece pos " << 0 << " " << input[0] << "\n";
+    cout << "Piece pos " << 1 << " " << input[1] << "\n";
+    cout << "Piece pos " << 2 << " " << input[2] << "\n";
+    cout << "Piece pos " << 3 << " " << input[3] << "\n";
+    cout << "Piece nearest opp " << 0 << " " << input[4] << "\n";
+    cout << "Piece nearest opp " << 1 << " " << input[5] << "\n";
+    cout << "Piece nearest opp " << 2 << " " << input[6] << "\n";
+    cout << "Piece nearest opp " << 3 << " " << input[7] << "\n";
+    cout << "Piece nearest star " << 0 << " " << input[8] << "\n";
+    cout << "Piece nearest star " << 1 << " " << input[9] << "\n";
+    cout << "Piece nearest star " << 2 << " " << input[10] << "\n";
+    cout << "Piece nearest star " << 3 << " " << input[11] << "\n";
+    cout << "Piece nearest globe " << 0 << " " << input[12] << "\n";
+    cout << "Piece nearest globe " << 1 << " " << input[13] << "\n";
+    cout << "Piece nearest globe " << 2 << " " << input[14] << "\n";
+    cout << "Piece nearest globe " << 3 << " " << input[15] << "\n";
+    cout << "Dice roll " << input[16] << "\n";
 
+    cout << "\n Output is " << calc_out[0] << endl;
     if(calc_out[0] < -0.5 )
     {
         if(debug)

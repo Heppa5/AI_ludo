@@ -17,14 +17,14 @@ std::random_device gen;
 
 const unsigned int num_input = 17; // placement of each piece, closest opponent for each piece,distance to globe for each piece,distance to star for each piece, dice roll = 17
 const unsigned int num_output = 1; // which piece to move
-const unsigned int num_layers = 5;
-const unsigned int num_neurons_hidden = 9;
-const int max_weight_value=5;
-const int min_weight_value=-5;
+const unsigned int num_layers = 4;
+const unsigned int num_neurons_hidden = 6;
+const int max_weight_value=12;
+const int min_weight_value=-12;
 
 const int population_size=25;
-const int resolution=5; // number of bits resolution
-const int number_of_games_per_individual=1000;
+const int resolution=8; // number of bits resolution
+const int number_of_games_per_individual=100;
 unsigned int connum;           // connections number
 int range_weights=0;
 using namespace std;
@@ -171,10 +171,8 @@ void evaluation_function(game *g,QApplication* a, vector<individual> *pop, int i
         std::vector<int> player_positions=g->player_positions;
         for(int h=0; h< 4 ; h++)
         {
-            if(player_positions[h]==-1 ){
+            if(player_positions[h]==-1 )
                 population[index].evaluation =population[index].evaluation-40;
-                int wpw=2;
-            }
             else if(player_positions[h]==99)
                 population[index].evaluation =population[index].evaluation+60;
             else
@@ -188,7 +186,7 @@ void evaluation_function(game *g,QApplication* a, vector<individual> *pop, int i
 
     }
     population[index].evaluation = population[index].evaluation/number_of_games_per_individual;
-    population[index].evaluation = population[index].evaluation + population[index].wins*25;
+    population[index].evaluation = population[index].evaluation + population[index].wins*100;
 }
 
 vector<individual> create_two_children(vector<individual> *pop, int father_index, int mother_index )
@@ -299,42 +297,24 @@ bool compareBySize(individual &a, individual &b)
 {
     return a.evaluation > b.evaluation;
 }
-void select_best_offspring(vector<individual>* pop, vector<individual>* child, fann *ann , int generation)
+void select_best_offspring(vector<individual>* pop, vector<individual>* child )
 {
     vector<individual>& population = *pop;
     vector<individual>& children = *child;
     std::sort(population.begin(), population.end(), compareBySize);
     std::sort(children.begin(), children.end(), compareBySize);
 
-    int number_of_random_each_generation=5;
-    for(int i=0; i< number_of_random_each_generation;i++)
-    {
-        individual indi_initialization;
-        fann_randomize_weights(ann,min_weight_value,max_weight_value);
-        fann_connection *con_local = new fann_connection;
-        con_local = (fann_connection*)calloc(connum, sizeof(*con_local));
-        fann_get_connection_array(ann, con_local);
-
-        adjust_weights_to_resolution(connum,con_local,resolution);
-        indi_initialization.connum=connum;
-        indi_initialization.con=con_local;
-        indi_initialization.generation=generation;
-        indi_initialization.genes=convert_connections_to_genes(connum,con_local,resolution);
-        population[population.size()-1-i]=indi_initialization;
-    }
-
-
     /*for(int i=0; i< population.size() ; i++)
     {
         cout << population[i].evaluation << endl;
     }*/
 
-    for(int i=0; i< population.size()-number_of_random_each_generation ; i++)
+    for(int i=0; i< population.size() ; i++)
     {
-        if(children[i].evaluation > population[population.size()-1-number_of_random_each_generation-i].evaluation)
+        if(children[i].evaluation > population[population.size()-1-i].evaluation)
         {
-            cout << "Success - better child \n" << " Child evaluation was: " << children[i].evaluation << " individual evaluation was: " << population[population.size()-1-i-number_of_random_each_generation].evaluation << endl;
-            population[population.size()-1-number_of_random_each_generation-i]=children[i];
+            cout << "Success - better child \n" << " Child evaluation was: " << children[i].evaluation << " individual evaluation was: " << population[population.size()-1-i].evaluation << endl;
+            population[population.size()-1-i]=children[i];
         }
     }
 
@@ -360,20 +340,10 @@ int main(int argc, char *argv[]){
     ofstream myfile;
     myfile.open ("output.txt");
 
+    struct fann *ann;
+    ann = fann_create_from_file("hahah.net");
 
-    range_weights=max_weight_value-min_weight_value;
-    struct fann *ann = fann_create_standard(num_layers, num_input,num_neurons_hidden,num_neurons_hidden,num_neurons_hidden, num_output);
-    // setting activation functions as sigmoid_symmetric functions.
-    //fann_set_activation_function_layer(ann, FANN_SIGMOID_SYMMETRIC, 0);
-    fann_set_activation_function_hidden(ann, FANN_SIGMOID_SYMMETRIC);
-    //fann_set_activation_function_output(ann, FANN_LINEAR_PIECE);
-    fann_set_activation_function_output(ann, FANN_LINEAR_PIECE_SYMMETRIC);
-    fann_randomize_weights(ann,min_weight_value,max_weight_value);
 
-    struct fann_connection *con;   // weight matrix
-    connum = fann_get_total_connections(ann);
-    con = (fann_connection*)calloc(connum, sizeof(*con));
-    fann_get_connection_array(ann, con);
 
     ludo_player p1(ann);
     // ######################## Setting up game #######################################
@@ -381,17 +351,17 @@ int main(int argc, char *argv[]){
     qRegisterMetaType<positions_and_dice>();
     ludo_player_random  p2,p3, p4;
     game g;
-    g.setGameDelay(000); //if you want to see the game, set a delay
+    g.setGameDelay(3000); //if you want to see the game, set a delay
     // Add a GUI <-- remove the '/' to uncomment block
-   /* Dialog w;
+    Dialog w;
     QObject::connect(&g,SIGNAL(update_graphics(std::vector<int>)),&w,SLOT(update_graphics(std::vector<int>)));
     QObject::connect(&g,SIGNAL(set_color(int)),                   &w,SLOT(get_color(int)));
     QObject::connect(&g,SIGNAL(set_dice_result(int)),             &w,SLOT(get_dice_result(int)));
     QObject::connect(&g,SIGNAL(declare_winner(int)),              &w,SLOT(get_winner()));
     QObject::connect(&g,SIGNAL(close()),&a,SLOT(quit()));
-    w.show();*/
+    w.show();
     // //Or don't add the GUI
-    QObject::connect(&g,SIGNAL(close()),&a,SLOT(quit()));
+    //QObject::connect(&g,SIGNAL(close()),&a,SLOT(quit()));
     //*/
 
     //set up for each player
@@ -417,165 +387,25 @@ int main(int argc, char *argv[]){
 
     // ############################ END OF SETTING UP GAME ############################################
 
-    // Jesper Adding code start
 
-
-
-
-
-
-
-
-    vector<individual> population;
-    for (int i=0; i<population_size ; i++)
+    while (true)
     {
+        g.start();
+        a.exec();
 
-        //cout << "\n########## NEW INDIVIDUAL IN INITIALIZATION ####### \n";
-        individual indi_initialization;
-        fann_randomize_weights(ann,min_weight_value,max_weight_value);
-        fann_connection *con_local = new fann_connection;
-        con_local = (fann_connection*)calloc(connum, sizeof(*con_local));
-        fann_get_connection_array(ann, con_local);  
+        g.reset();
 
-        /*if(i==0)
-        {
-             cout << "Jesper ######################3" << endl;
-            for (uint j = 0; j < connum; ++j) {
-                printf("weight from %u to %u: %f\n", con_local[j].from_neuron,
-                       con_local[j].to_neuron, con_local[j].weight);
-            }
-        }*/
-        adjust_weights_to_resolution(connum,con_local,resolution);
-        indi_initialization.connum=connum;
-        indi_initialization.con=con_local;
-        indi_initialization.generation=0;
-        indi_initialization.genes=convert_connections_to_genes(connum,con_local,resolution);
-
-        /*if(i==0)
-        {
-            cout << "Jesper ######################3" << endl;
-            /*for (uint i = 0; i < connum; ++i) {
-                printf("weight from %u to %u: %f\n", con_local[i].from_neuron,
-                       con_local[i].to_neuron, con_local[i].weight);
-            }
-
-            //cout << con_local[indi_initialization.genes.size()-1].weight<<"\t"<<indi_initialization.genes[indi_initialization.genes.size()-1] << endl;
-        }*/
-        population.push_back(indi_initialization);
-
+        g.wait();
     }
 
 
-    /*for (int i=0; i<population.size() ; i++)
-    {
-        cout << "\n########## NEW INDIVIDUAL IN check ####### \n";
-
-        fann_connection *con2=population[i].con;
-        cout << &population[i].con << endl;
-        for (uint i = 0; i < connum; ++i) {
-            printf("weight from %u to %u: %f\n", con2[i].from_neuron,
-                   con2[i].to_neuron, con2[i].weight);
-        }
-    }*/
-
-
-    // Jesper adding code
-    bool done=false;
-    int generation=1;
-    while (done==false)
-    {
-        if(number_of_games_per_individual>99)
-            cout << "##########################Evaluation - generation: " << generation << " ############################" << endl;
-
-        // evaluation of population
-        for (int i=0 ; i<population.size(); i++)
-        {
-            //cout << "New player " << i << endl;
-            //p1.set_weights(population[i].con,connum);
-            population[i].evaluation=0;
-            population[i].wins=0;
-            evaluation_function(&g,&a,&population,i,&p1);
-            if(number_of_games_per_individual>99)
-                cout << "Individual " << i << " got an evaluation of \t" << population[i].evaluation << "\t and won: " << population[i].wins << " out of " << number_of_games_per_individual << " games and from gen: " <<population[i].generation <<  endl;
-        }
-
-
-        // ############ Selection ################
-        vector<int> parents;
-        for(int i=0; i<population.size()/2 ; i++)
-        {
-            vector<int> two_parents = selection_roulette_method(&population);
-            parents.push_back(two_parents[0]);
-            parents.push_back(two_parents[1]);
-        }
 
 
 
-        // Mutation
-        vector <individual> children=generate_children(&population, generation, parents , ann);
-        // Just change entire population
 
 
-        /*for (int i=0; i<children.size() ; i++)
-        {
-            cout << "\n########## NEW INDIVIDUAL IN check ####### \n";
-
-            fann_connection *con2=children[i].con;
-            for (uint i = 0; i < connum; ++i) {
-                printf("weight from %u to %u: %f\n", con2[i].from_neuron,
-                       con2[i].to_neuron, con2[i].weight);
-            }
-        }*/
-
-        int highest=-999;
-        int highest_win=0;
-        int total=0;
-        for (int i= 0 ; i<population.size() ; i++)
-        {
-            if(population[i].evaluation>highest)
-                highest=population[i].evaluation;
-            if(population[i].wins>highest_win)
-                highest_win=population[i].wins;
-            total=total+population[i].evaluation;
-        }
-        double average=(double)total/(double)population.size();
-        //done=true;
-        myfile << generation <<"\t"<<highest <<"\t"<< highest_win <<"\t"<<average <<"\t"<< endl;
-        /*for(int i= 0; i< population.size() ; i++)
-        {
-            if(population[i].evaluation>400)
-            {
-                cout << "\nWOOOOOW Jeg har noget tilnærmelsesvist ok\n\n\n" << endl;
-                fann_set_weight_array(ann,population[i].con,connum);
-                fann_save(ann,"hahah.net");
-                done=true;
-            }
-        }*/
-
-        for(int i= 0; i< children.size() ; i++)
-        {
-            children[i].evaluation=0;
-            evaluation_function(&g,&a,&children,i,&p1);
-        }
-        //let_best_3_indi_stay(&population,&children);
-        select_best_offspring(&population, &children,ann ,  generation );
-        //population=children;
-       // std::sort(population.begin(), population.end(), compareBySize);
-        generation++;
-
-        /*for (int i=0; i<1 ; i++)
-        {
-            cout << "\n########## NEW INDIVIDUAL IN check ####### \n";
-
-            fann_connection *con2=population[i].con;
-            cout << &population[i].con << endl;
-            for (uint i = 0; i < connum; ++i) {
-                printf("weight from %u to %u: %f\n", con2[i].from_neuron,
-                       con2[i].to_neuron, con2[i].weight);
-            }
-        }*/
 
 
-    }
+
     return 0;
 }
