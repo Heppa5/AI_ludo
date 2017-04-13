@@ -43,7 +43,40 @@ void setup_game(QApplication *a, game *g, ludo_player *p1, ludo_player_random *p
 }
 
 
+void evaluation_function(game *g,QApplication* a, individual* tactic, ludo_player *p1,uint connum, int number_of_games_per_individual)
+{
 
+    p1->change_individual(tactic);
+    //p1->set_weights(population[index].con,connum);
+    for(int j=0 ; j < number_of_games_per_individual ; j++)
+    {
+        g->start();
+        a->exec();
+        while (a->closingDown()){
+        }
+        // ## ################# evaluation function ###########################
+        std::vector<int> player_positions=g->player_positions;
+        for(int h=0; h< 4 ; h++)
+        {
+            if(player_positions[h]==-1 ){
+                tactic->set_evaluation(tactic->get_evaluation() -5);
+                //int wpw=2;
+            }
+            else if(player_positions[h]==99)
+                tactic->set_evaluation(tactic->get_evaluation() +60);
+            else
+                tactic->set_evaluation(tactic->get_evaluation() +player_positions[h]);
+        }
+        if(g->winner==0)
+           tactic->set_wins(tactic->get_wins()+1);
+
+        g->reset();
+        if(g->wait()){}
+
+    }
+    tactic->set_evaluation(tactic->get_evaluation() / number_of_games_per_individual);
+    tactic->set_evaluation(tactic->get_evaluation() + tactic->get_wins()*25);
+}
 
 vector<int > selection_roulette_method(vector<individual*> *population)
 {
@@ -109,5 +142,50 @@ vector<int > selection_roulette_method(vector<individual*> *population)
     parents.push_back(mother_index_population);
     return parents;
 }
+
+bool compareBySize(individual* &a, individual* &b)
+{
+    return a->get_evaluation() > b->get_evaluation();
+}
+void select_best_offspring(vector<individual*>* pop, vector<individual*>* child, int generation,uint connum,int resolution,int min_weight_value, int max_weight_value)
+{
+    vector<individual*>& population = *pop;
+    vector<individual*>& children = *child;
+    std::sort(population.begin(), population.end(), compareBySize);
+    std::sort(children.begin(), children.end(), compareBySize);
+
+    int number_of_random_each_generation=5;
+    for(int i=0 ; i<number_of_random_each_generation ; i++)
+    {
+        individual* initialization= new individual(min_weight_value,max_weight_value,resolution,generation);
+        initialization->true_random_weights();
+        initialization->convert_connections_to_genes();
+        delete population[population.size()-1-i];
+        population[population.size()-1-i]=initialization;
+
+    }
+
+
+    /*for(int i=0; i< population.size() ; i++)
+    {
+        cout << population[i].evaluation << endl;
+    }*/
+    int count=0;
+    for(int i=0; i< population.size()-number_of_random_each_generation ; i++)
+    {
+        if(children[i]->get_evaluation() > population[population.size()-1-number_of_random_each_generation-i]->get_evaluation())
+        {
+            cout << "Success - better child \n" << " Child evaluation was: " << children[i]->get_evaluation() << " individual evaluation was: " << population[population.size()-1-i-number_of_random_each_generation]->get_evaluation()<< endl;
+            delete population[population.size()-1-number_of_random_each_generation-i];
+            population[population.size()-1-number_of_random_each_generation-i]=children[i];
+            count++;
+        }
+    }
+    for(int i=0; i< children.size()-count ; i++)
+    {
+        delete children[children.size()-1-i];
+    }
+}
+
 
 #endif // WORKING_FUNCTIONS_H

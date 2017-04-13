@@ -9,7 +9,8 @@ individual::individual(int min_weig, int max_weig, int reso, int gene)
 {
     ann.create_standard_array(num_layers,layers);
     ann.set_activation_function_hidden(SIGMOID_SYMMETRIC);
-    ann.set_activation_function_output(LINEAR_PIECE_SYMMETRIC);
+    //ann.set_activation_function_output(LINEAR_PIECE_SYMMETRIC);
+    ann.set_activation_function_output(LINEAR);
 
     min_weight_value=min_weig;
     max_weight_value=max_weig;

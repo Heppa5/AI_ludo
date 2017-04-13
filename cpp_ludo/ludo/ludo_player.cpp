@@ -146,10 +146,10 @@ int ludo_player::make_decision(){
     auto calc_out =tactic->ann.run(input);
     /*if(calc_out[0]>1 || calc_out[0]<(-1))
         cout << "###### Dont trust fann ###########" << endl;*/
-    //bool debug=false;
+    //debug=true;
     if (debug)
     {
-        cout << "############################### MOVE GETTING DECIDED ###############################" << endl;
+        /*cout << "############################### MOVE GETTING DECIDED ###############################" << endl;
         cout << "Piece pos " << 0 << " " << input[0] << "\n";
         cout << "Piece pos " << 1 << " " << input[1] << "\n";
         cout << "Piece pos " << 2 << " " << input[2] << "\n";
@@ -167,9 +167,25 @@ int ludo_player::make_decision(){
         cout << "Piece nearest globe " << 2 << " " << input[14] << "\n";
         cout << "Piece nearest globe " << 3 << " " << input[15] << "\n";
         cout << "Dice roll " << input[16] << "\n";
-        cout << "\n Output is: " << calc_out[0] << endl;
+        cout << "\n Output is: " << calc_out[0] << endl;*/
     }
-    if(calc_out[0] < -0.5 )
+    if(calc_out[0]>calc_out[1] && calc_out[0]>calc_out[2] && calc_out[0]>calc_out[3])
+    {
+        return 0;
+    }
+    else if(calc_out[1]>calc_out[0] && calc_out[1]>calc_out[2] && calc_out[1]>calc_out[3])
+    {
+        return 1;
+    }
+    else if(calc_out[2]>calc_out[0] && calc_out[2]>calc_out[1] && calc_out[2]>calc_out[3])
+    {
+        return 2;
+    }
+    else if(calc_out[3]>calc_out[0] && calc_out[3]>calc_out[2] && calc_out[3]>calc_out[1])
+    {
+        return 3;
+    }
+    /*if(calc_out[0] < -0.5 )
     {
         if(debug)
             std::cout << calc_out[0] << " and we choose 0" << std::endl;
@@ -192,7 +208,7 @@ int ludo_player::make_decision(){
         if(debug)
             std::cout << calc_out[0] << " and we choose 3" << std::endl;
         return 3;
-    }
+    }*/
     return -1;
 }
 
