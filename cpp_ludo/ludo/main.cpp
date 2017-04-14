@@ -13,19 +13,20 @@
 #include "random"
 #include "working_functions.h"
 #include "individual.h"
+#include "fstream"
 
 Q_DECLARE_METATYPE( positions_and_dice )
 
 using namespace std;
 using namespace FANN;
 
-const unsigned int num_layers=3;
-const unsigned int layers[3]={17,6,4};
+const unsigned int num_layers=6;
+const unsigned int layers[6]={17,10,11,12,9,4};
 
-const int max_weight_value=2;
-const int min_weight_value=-2;
+const int max_weight_value=10;
+const int min_weight_value=-10;
 const int resolution=5;
-const int population_size=24;
+const int population_size=50;
 const int number_of_games_per_individual=100;
 
 
@@ -33,6 +34,9 @@ const int number_of_games_per_individual=100;
 
 
 int main(int argc, char *argv[]){
+
+    ofstream myfile;
+    myfile.open ("output.txt");
     QApplication a(argc, argv);
     qRegisterMetaType<positions_and_dice>();
     game g;
@@ -64,6 +68,7 @@ int main(int argc, char *argv[]){
     }
     generation++;
     bool done=false;
+    int highest_win_overall=3;
     while(done==false)
     {
         cout << "################################# Generation: " << generation << " ##############################" << endl;
@@ -94,11 +99,34 @@ int main(int argc, char *argv[]){
             children.push_back(two_children[1]);
         }
 
+        int highest=-999;
+        int highest_win=0;
+        int total=0;
+        int highest_win_index=0;
+        for (int i= 0 ; i<population.size() ; i++)
+        {
+            if(population[i]->get_evaluation()>highest)
+                highest=population[i]->get_evaluation();
+            if(population[i]->get_wins()>highest_win)
+            {
+                highest_win=population[i]->get_wins();
+                highest_win_index=i;
+            }
+            total=total+population[i]->get_evaluation();
+        }
+        double average=(double)total/(double)population.size();
+        //done=true;
+        myfile << generation <<"\t"<<highest <<"\t"<< highest_win <<"\t"<<average <<"\t"<< endl;
+        if(population[highest_win_index]->get_wins()>highest_win_overall)
+        {
+            population[highest_win_index]->ann.save("The_best_net.net");
+        }
+
         for(int i=0; i< children.size() ; i++)
         {
             children[i]->set_wins(0);
             children[i]->set_evaluation(0);
-            evaluation_function(&g,&a,population[i],&p1,connum,number_of_games_per_individual);
+            evaluation_function(&g,&a,children[i],&p1,connum,number_of_games_per_individual);
             //cout << "children " << i << " got an evaluation of \t" << population[i]->get_evaluation() << "\t and won: " << population[i]->get_wins() << " out of " << number_of_games_per_individual << " games and from gen: " <<population[i]->get_generation() <<  endl;
         }
 

@@ -59,11 +59,11 @@ void evaluation_function(game *g,QApplication* a, individual* tactic, ludo_playe
         for(int h=0; h< 4 ; h++)
         {
             if(player_positions[h]==-1 ){
-                tactic->set_evaluation(tactic->get_evaluation() -5);
+                tactic->set_evaluation(tactic->get_evaluation() -50);
                 //int wpw=2;
             }
             else if(player_positions[h]==99)
-                tactic->set_evaluation(tactic->get_evaluation() +60);
+                tactic->set_evaluation(tactic->get_evaluation() +55);
             else
                 tactic->set_evaluation(tactic->get_evaluation() +player_positions[h]);
         }
@@ -75,7 +75,7 @@ void evaluation_function(game *g,QApplication* a, individual* tactic, ludo_playe
 
     }
     tactic->set_evaluation(tactic->get_evaluation() / number_of_games_per_individual);
-    tactic->set_evaluation(tactic->get_evaluation() + tactic->get_wins()*25);
+    tactic->set_evaluation(tactic->get_evaluation() + tactic->get_wins()*10);
 }
 
 vector<int > selection_roulette_method(vector<individual*> *population)
@@ -154,13 +154,13 @@ void select_best_offspring(vector<individual*>* pop, vector<individual*>* child,
     std::sort(population.begin(), population.end(), compareBySize);
     std::sort(children.begin(), children.end(), compareBySize);
 
-    int number_of_random_each_generation=5;
+    int number_of_random_each_generation=10;
     for(int i=0 ; i<number_of_random_each_generation ; i++)
     {
         individual* initialization= new individual(min_weight_value,max_weight_value,resolution,generation);
         initialization->true_random_weights();
         initialization->convert_connections_to_genes();
-        delete population[population.size()-1-i];
+       // delete population[population.size()-1-i];
         population[population.size()-1-i]=initialization;
 
     }
@@ -168,12 +168,14 @@ void select_best_offspring(vector<individual*>* pop, vector<individual*>* child,
 
     /*for(int i=0; i< population.size() ; i++)
     {
-        cout << population[i].evaluation << endl;
+        cout << population[i]->get_evaluation() << endl;
     }*/
     int count=0;
     for(int i=0; i< population.size()-number_of_random_each_generation ; i++)
     {
-        if(children[i]->get_evaluation() > population[population.size()-1-number_of_random_each_generation-i]->get_evaluation())
+        //cout <<(children[i]->get_evaluation() > population[population.size()-1-number_of_random_each_generation-i]->get_evaluation()) << endl;
+        //cout << children[i]->get_evaluation() << "\t hej " << population[population.size()-1-number_of_random_each_generation-i]->get_evaluation()  << endl;
+        if(children[i]->get_evaluation()-4 > population[population.size()-1-number_of_random_each_generation-i]->get_evaluation())
         {
             cout << "Success - better child \n" << " Child evaluation was: " << children[i]->get_evaluation() << " individual evaluation was: " << population[population.size()-1-i-number_of_random_each_generation]->get_evaluation()<< endl;
             delete population[population.size()-1-number_of_random_each_generation-i];
