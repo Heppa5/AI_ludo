@@ -14,19 +14,22 @@
 #include "working_functions.h"
 #include "individual.h"
 #include "fstream"
+#include "evaluate_individual.h"
+#include <atomic>
+
 
 Q_DECLARE_METATYPE( positions_and_dice )
 
 using namespace std;
 using namespace FANN;
 
-const unsigned int num_layers=4;
-const unsigned int layers[4]={17,4,6,4};
+const unsigned int num_layers=6;
+const unsigned int layers[6]={17,10,11,12,9,4};
 
-const int max_weight_value=5;
-const int min_weight_value=-5;
+const int max_weight_value=10;
+const int min_weight_value=-10;
 const int resolution=5;
-const int population_size=40;
+const int population_size=50;
 const int number_of_games_per_individual=100;
 
 
@@ -35,16 +38,13 @@ const int number_of_games_per_individual=100;
 
 int main(int argc, char *argv[]){
 
+    atomic_bool done_e
     ofstream myfile;
     myfile.open ("output.txt");
-    QApplication a(argc, argv);
+    //QApplication a(argc, argv);
     qRegisterMetaType<positions_and_dice>();
-    game g;
-    ludo_player p1;
-    ludo_player_random p2,p3, p4;
-    Dialog w;
-    setup_game(&a,&g,&p1,&p2,&p3,&p4,&w);
     vector<individual*> population;
+    vector<evaluate_individual*> evaluate_population;
     int generation=0;
     int connum=0;
     connection *con;
@@ -64,7 +64,10 @@ int main(int argc, char *argv[]){
         initialization->true_random_weights();
         initialization->convert_connections_to_genes();
         population.push_back(initialization);
-
+        QApplication* a=new QApplication(argc, argv);
+        evaluate_individual* in=new evaluate_individual(number_of_games_per_individual,a);
+        in->setup_game();
+        evaluate_population.push_back(in);
     }
     generation++;
     bool done=false;
@@ -73,11 +76,12 @@ int main(int argc, char *argv[]){
     {
         cout << "################################# Generation: " << generation << " ##############################" << endl;
         // evaluation
+        evaluation_function(&population,&evaluate_population );
         for(int i=0; i< population.size() ; i++)
         {
-            population[i]->set_wins(0);
-            population[i]->set_evaluation(0);
-            evaluation_function(&g,&a,population[i],&p1,connum,number_of_games_per_individual);
+           // population[i]->set_wins(0);
+            //population[i]->set_evaluation(0);
+          //  evaluation_function(&g,&a,population[i],&p1,connum,number_of_games_per_individual);
             cout << "Individual " << i << " got an evaluation of \t" << population[i]->get_evaluation() << "\t and won: " << population[i]->get_wins() << " out of " << number_of_games_per_individual << " games and from gen: " <<population[i]->get_generation() <<  endl;
         }
 
@@ -121,14 +125,14 @@ int main(int argc, char *argv[]){
         {
             population[highest_win_index]->ann.save("The_best_net.net");
         }
-
-        for(int i=0; i< children.size() ; i++)
+        evaluation_function(&children,&evaluate_population );
+        /*for(int i=0; i< children.size() ; i++)
         {
-            children[i]->set_wins(0);
-            children[i]->set_evaluation(0);
-            evaluation_function(&g,&a,children[i],&p1,connum,number_of_games_per_individual);
+            //children[i]->set_wins(0);
+            //children[i]->set_evaluation(0);
+           // evaluation_function(&g,&a,children[i],&p1,connum,number_of_games_per_individual);
             //cout << "children " << i << " got an evaluation of \t" << population[i]->get_evaluation() << "\t and won: " << population[i]->get_wins() << " out of " << number_of_games_per_individual << " games and from gen: " <<population[i]->get_generation() <<  endl;
-        }
+        }*/
 
         select_best_offspring(&population,&children,generation,connum,resolution,min_weight_value,max_weight_value);
 
@@ -136,7 +140,7 @@ int main(int argc, char *argv[]){
     }
 
 
-    a.quit();
+    //a.quit();
 
     for(int i=0; i< population.size() ; i++)
     {

@@ -1,6 +1,6 @@
 #ifndef WORKING_FUNCTIONS_H
 #define WORKING_FUNCTIONS_H
-
+#include "evaluate_individual.h"
 
 void setup_game(QApplication *a, game *g, ludo_player *p1, ludo_player_random *p2, ludo_player_random *p3, ludo_player_random *p4,Dialog *w)
 {
@@ -43,7 +43,7 @@ void setup_game(QApplication *a, game *g, ludo_player *p1, ludo_player_random *p
 }
 
 
-void evaluation_function(game *g,QApplication* a, individual* tactic, ludo_player *p1,uint connum, int number_of_games_per_individual)
+/*void evaluation_function(game *g,QApplication* a, individual* tactic, ludo_player *p1,uint connum, int number_of_games_per_individual)
 {
 
     p1->change_individual(tactic);
@@ -59,13 +59,13 @@ void evaluation_function(game *g,QApplication* a, individual* tactic, ludo_playe
         for(int h=0; h< 4 ; h++)
         {
             if(player_positions[h]==-1 ){
-                tactic->set_evaluation(tactic->get_evaluation() -90);
+                tactic->set_evaluation(tactic->get_evaluation() -50);
                 //int wpw=2;
             }
             else if(player_positions[h]==99)
-                tactic->set_evaluation(tactic->get_evaluation() +90);
+                tactic->set_evaluation(tactic->get_evaluation() +55);
             else
-                tactic->set_evaluation(tactic->get_evaluation() +player_positions[h]+30);
+                tactic->set_evaluation(tactic->get_evaluation() +player_positions[h]);
         }
         if(g->winner==0)
            tactic->set_wins(tactic->get_wins()+1);
@@ -75,7 +75,26 @@ void evaluation_function(game *g,QApplication* a, individual* tactic, ludo_playe
 
     }
     tactic->set_evaluation(tactic->get_evaluation() / number_of_games_per_individual);
-    //tactic->set_evaluation(tactic->get_evaluation() + tactic->get_wins()*10);
+    tactic->set_evaluation(tactic->get_evaluation() + tactic->get_wins()*10);
+}*/
+
+
+void evaluation_function(vector<individual*>* pop, vector<evaluate_individual*>* pop_eva, QApplication* a)
+{
+    vector<individual*>& population = *pop;
+    vector<evaluate_individual*>& population_evaluation = *pop_eva;
+
+    for (int i=0; i<population.size() ; i++)
+    {
+        population[i]->set_wins(0);
+        population[i]->set_evaluation(0);
+        population_evaluation[i]->update_individual(population[i]);
+        population_evaluation[i]->start();
+    }
+    for (int i=0; i<population.size() ; i++)
+    {
+        population_evaluation[i]->wait();
+    }
 }
 
 vector<int > selection_roulette_method(vector<individual*> *population)

@@ -59,8 +59,8 @@ private:
     connection* con;
 
 
-    const unsigned int num_layers=4;
-    const unsigned int layers[4]={17,4,10,4};
+    const unsigned int num_layers=6;
+    const unsigned int layers[6]={17,10,11,12,9,4};
 
 };
 

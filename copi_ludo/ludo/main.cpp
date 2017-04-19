@@ -341,7 +341,7 @@ int main(int argc, char *argv[]){
     myfile.open ("output.txt");
 
     struct fann *ann;
-    ann = fann_create_from_file("hahah.net");
+    ann = fann_create_from_file("the_best_net.net");
 
 
 
@@ -351,17 +351,17 @@ int main(int argc, char *argv[]){
     qRegisterMetaType<positions_and_dice>();
     ludo_player_random  p2,p3, p4;
     game g;
-    g.setGameDelay(3000); //if you want to see the game, set a delay
+    g.setGameDelay(000); //if you want to see the game, set a delay
     // Add a GUI <-- remove the '/' to uncomment block
-    Dialog w;
+    /*Dialog w;
     QObject::connect(&g,SIGNAL(update_graphics(std::vector<int>)),&w,SLOT(update_graphics(std::vector<int>)));
     QObject::connect(&g,SIGNAL(set_color(int)),                   &w,SLOT(get_color(int)));
     QObject::connect(&g,SIGNAL(set_dice_result(int)),             &w,SLOT(get_dice_result(int)));
     QObject::connect(&g,SIGNAL(declare_winner(int)),              &w,SLOT(get_winner()));
     QObject::connect(&g,SIGNAL(close()),&a,SLOT(quit()));
-    w.show();
+    w.show();*/
     // //Or don't add the GUI
-    //QObject::connect(&g,SIGNAL(close()),&a,SLOT(quit()));
+    QObject::connect(&g,SIGNAL(close()),&a,SLOT(quit()));
     //*/
 
     //set up for each player
