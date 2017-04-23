@@ -8,9 +8,8 @@ individual::individual()
 individual::individual(int min_weig, int max_weig, int reso, int gene)
 {
     ann.create_standard_array(num_layers,layers);
-    ann.set_activation_function_layer(SIGMOID_SYMMETRIC,1);
-    ann.set_activation_function_layer(SIGMOID_SYMMETRIC,2);
-    ann.set_activation_function_output(LINEAR);
+    ann.set_activation_function_hidden(SIGMOID);
+    ann.set_activation_function_output(SIGMOID);
 
     min_weight_value=min_weig;
     max_weight_value=max_weig;
@@ -76,7 +75,7 @@ vector<individual*> individual::make_two_children(individual *mother, int cur_ge
 
 void individual::adjust_weights_to_resolution(){
 
-    cout << connum << endl;
+    //cout << connum << endl;
     for (uint i = 0; i < connum; ++i)
     {
         double cur_weight=(double)con[i].weight;
@@ -125,7 +124,7 @@ void individual::generate_connections_from_genes()
     ann.set_weight_array(con,connum);
 }
 
-/*void individual::true_random_weights()
+void individual::true_random_weights()
 {
     random_device gen;
     std::uniform_int_distribution<> dis(0, pow(2,resolution)-1);
@@ -136,15 +135,11 @@ void individual::generate_connections_from_genes()
         con[i].weight = (min_weight_value+range_weights*random_number*1/pow(2,resolution));
     }
     ann.set_weight_array(con,connum);
-}*/
+}
 
-void individual::true_random_weights()
+/*void individual::true_random_weights()
 {
-    random_device gen;
-    std::uniform_int_distribution<> dis(0, pow(2,resolution)-1);
-    int i=0;
-    /*printf("weight from %u to %u: %f\n", con[index].from_neuron,
-            con[index].to_neuron, con[index].weight);*/
+
 
     for (i; i < (layers[0]+1)*4 ; i++)
     {
@@ -166,4 +161,4 @@ void individual::true_random_weights()
         con[i].weight = (min_weight_value+range_weights*random_number*1/pow(2,resolution));
     }
     ann.set_weight_array(con,connum);
-}
+}*/

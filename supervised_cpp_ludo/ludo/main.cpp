@@ -23,9 +23,12 @@ using namespace FANN;
 const unsigned int num_layers=4;
 const unsigned int layers[4]={17,4,6,4};
 
-const int max_weight_value=5;
-const int min_weight_value=-5;
-const int resolution=5;
+int max_weight_value=5;
+int min_weight_value=-5;
+int first_max_weight_value=2;
+int first_min_weight_value=-2;
+int resolution=6;
+int first_resolution=5;
 const int population_size=40;
 const int number_of_games_per_individual=100;
 
@@ -46,26 +49,31 @@ int main(int argc, char *argv[]){
     setup_game(&a,&g,&p1,&p2,&p3,&p4,&w);
     vector<individual*> population;
     int generation=0;
-    int connum=0;
-    connection *con;
+    //int connum=0;
 
-    FANN::neural_net ann;
-    //ann.create_standard(3, 2,2,2);
-    ann.create_standard_array(num_layers,layers);
-    ann.set_activation_function_hidden(SIGMOID_SYMMETRIC);
-    ann.set_activation_function_output(LINEAR_PIECE_SYMMETRIC);
-
-    connum=ann.get_total_connections();
+    cout << "Why? " << endl;
 
     // initialize population
     for(int i=0 ; i<population_size ; i++)
     {
-        individual* initialization= new individual(min_weight_value,max_weight_value,resolution,generation);
+        cout << "Why2? " << endl;
+        individual* initialization= new individual(first_min_weight_value,first_max_weight_value,first_resolution,generation);
         initialization->true_random_weights();
+        initialization->ann.train_on_file("train_AI.data",100,0,0.001);
+        initialization->update_min_max_res(min_weight_value,max_weight_value,resolution);
+         cout << "Why3? " << endl;
+        initialization->adjust_weights_to_resolution();
+         cout << "Why4? " << endl;
         initialization->convert_connections_to_genes();
+         cout << "Why5? " << endl;
+        initialization->update_con_matrix();
+         cout << "Why6? " << endl;
         population.push_back(initialization);
 
     }
+    cout << "Why? " << endl;
+    int connum=population[0]->ann.get_total_connections();
+
     generation++;
     bool done=false;
     int highest_win_overall=3;

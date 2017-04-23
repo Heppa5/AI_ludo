@@ -17,6 +17,7 @@ void setup_game(QApplication *a, game *g, ludo_player *p1, ludo_player_random *p
     QObject::connect(g,SIGNAL(close()),a,SLOT(quit()));
     w->show();*/
     // //Or don't add the GUI
+
     QObject::connect(g,SIGNAL(close()),a,SLOT(quit()));
     //*/
 

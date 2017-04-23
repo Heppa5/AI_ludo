@@ -47,6 +47,16 @@ public:
     int get_generation(){
         return generation;
     }
+    void update_min_max_res(int min, int max, int res)
+    {
+        min_weight_value=min;
+        max_weight_value=max;
+        resolution=res;
+    }
+
+    void update_con_matrix(){
+        ann.get_connection_array(con);
+    }
 
     vector<int> genes;
 
@@ -59,8 +69,8 @@ private:
     connection* con;
 
 
-    const unsigned int num_layers=4;
-    const unsigned int layers[4]={17,4,10,4};
+    const unsigned int num_layers=3;
+    const unsigned int layers[3]={7,10,1};
 
 };
 

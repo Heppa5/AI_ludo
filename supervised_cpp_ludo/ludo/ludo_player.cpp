@@ -35,7 +35,201 @@ ludo_player::ludo_player():
     return -1;
 }*/
 
+/*
+ * Can I get out?
+ * Do I get send home if I move?
+ * Can I send an opponent home?
+ * Do I get to a star?
+ * Do I get to a Globe?
+ * Do I enter goal if I move?
+ * Is there a opponent piece, which can send me home and can my dice roll put me away from danger?
+ */
+
+
 int ludo_player::make_decision(){
+    //int num_input=fann_get_num_input(ann);
+    bool debug = false;
+    if (debug)
+    {
+         cout << endl << endl << endl << "######################## NEW DECISION ########" << endl;
+         for(int i=4; i<16 ; i++)
+             cout << "Opponent piece " << i << " is at position: " << pos_start_of_turn[i] << endl;
+    }
+    vector<double> results;
+    for (int piece=0; piece < 4 ; piece++)
+    {
+        fann_type input[7];
+        if (debug)
+        {
+
+            cout << "##### Piece:  " << piece << "   with position " << pos_start_of_turn[piece] << " and  dice roll: " << dice_roll<<endl;
+        }
+        // can I get out?
+        if(pos_start_of_turn[piece]==-1 && dice_roll==6)
+            input[0]=1;
+        else
+            input[0]=0;
+
+        // Do I get to a globe if I move?
+
+        input[4]=0;
+        if(pos_start_of_turn[piece]!=-1 && pos_start_of_turn[piece]<52)
+        {
+            if(pos_start_of_turn[piece]+dice_roll % 13 == 0 || (pos_start_of_turn[piece]+dice_roll - 8) % 13 == 0 )
+            {
+                input[4]=1;
+            }
+        }
+
+        //Do I get send home if I move (check for an opponent being on a globe and if I can move my piece there)
+        input[1]=0;
+        for(int opponent=4; opponent < 16 ; opponent++)
+        {
+            // if I get to an opponents position by moving this piece (+ fault check for not being in start)
+            if(pos_start_of_turn[piece]+dice_roll==pos_start_of_turn[opponent] && pos_start_of_turn[piece] != -1)
+            {
+                int j=pos_start_of_turn[opponent];
+                if(j % 13 == 0 || (j - 8) % 13 == 0 )
+                {
+                    input[1]=1;
+                }
+            }
+        }
+
+        // do I reach a star?
+        input[3]=0;
+        int star_index=99;
+        for( int i = 0; i < 8 ; i++)
+        {
+            if(pos_start_of_turn[piece]+dice_roll==star[i] && pos_start_of_turn[piece] != -1)
+            {
+                input[3]=1;
+                star_index=i;
+            }
+        }
+
+
+        // Can I send an opponent home?
+        input[2]=0;
+        for(int opponent=4; opponent < 16 ; opponent++)
+        {
+            // if I get to an opponents position by moving this piece (+ fault check for not being in start)
+            if(pos_start_of_turn[piece]+dice_roll==pos_start_of_turn[opponent] && pos_start_of_turn[piece] != -1)
+            {
+                input[2]=1;
+            }
+            else if(star_index != 99) // if I can hit a star check if there is an opponent on the next star
+            {
+                if( star_index < 8) // avoid going out of range
+                {
+                    if(star[star_index+1]==pos_start_of_turn[opponent])
+                    {
+                        input[2]=1;                    }
+                }
+
+            }
+        }
+
+
+
+        // Do I enter goal if I move?
+        if(pos_start_of_turn[piece]+dice_roll==56)
+        {
+            input[5]=1;
+        }
+        else
+        {
+            input[5]=0;
+        }
+
+        //Is there a opponent piece, which can send me home and can my dice roll put me away from danger?
+        input[6]=0;
+        if(pos_start_of_turn[piece] != -1 && pos_start_of_turn[piece] <= 52)
+        {
+            int position_to_check = pos_start_of_turn[piece] -6 +dice_roll;
+            for(int opponent=4; opponent < 16 ; opponent++)
+            {
+                if(pos_start_of_turn[opponent]>position_to_check && pos_start_of_turn[opponent]<pos_start_of_turn[piece])
+                    input[6]=1;
+                else if(position_to_check<0)
+                {
+                    if( (pos_start_of_turn[opponent]>=52-position_to_check && pos_start_of_turn[opponent]<52) || pos_start_of_turn[opponent]<pos_start_of_turn[piece] && pos_start_of_turn[opponent] >=0 )
+                        input[6]=1;
+                }
+            }
+        }
+        if(debug)
+        {
+           cout << " * Can I get out? \t\t\t" << input[0] << endl;
+           cout << " * Do I get send home if I move? \t" << input[1] << endl;
+           cout << " * Can I send an opponent home? \t" << input[2] << endl;
+           cout << " * Do I get to a star? \t\t\t" << input[3] << endl;
+           cout << " * Do I get to a Globe? \t\t" << input[4] << endl;
+           cout << " * Do I enter goal if I move? \t\t" << input[5] << endl;
+           cout << " * Is there a opponent piece, which can send me home?  \t\t" << input[6] << endl;
+        }
+        auto result=tactic->ann.run(input);
+        results.push_back(result[0]);
+    }
+    double highest=0;
+    vector<int> index;
+    for(int i=0; i<results.size();i++)
+    {
+        if(results[i]>highest)
+        {
+            index.clear();
+            index.push_back(i);
+            highest=results[i];
+        }
+        else if(results[i]==highest)
+        {
+            index.push_back(i);
+        }
+    }
+    int piece_to_move=-1;
+    if(index.size()>1)
+    {
+        random_device gen;
+        std::uniform_int_distribution<> dis(0,index.size()-1 );
+        piece_to_move = dis(gen);
+    }
+    else
+    {
+        piece_to_move=index[0];
+    }
+
+    return piece_to_move;
+
+
+    /*if(dice_roll == 6){
+        for(int i = 0; i < 4; ++i){
+            if(pos_start_of_turn[i]<0){
+                return i;
+            }
+        }
+        for(int i = 0; i < 4; ++i){
+            if(pos_start_of_turn[i]>=0 && pos_start_of_turn[i] != 99){
+                return i;
+            }
+        }
+    } else {
+        for(int i = 0; i < 4; ++i){
+            if(pos_start_of_turn[i]>=0 && pos_start_of_turn[i] != 99){
+                return i;
+            }
+        }
+        for(int i = 0; i < 4; ++i){ //maybe they are all locked in
+            if(pos_start_of_turn[i]<0){
+                return i;
+            }
+        }
+    }*/
+
+    return -1;
+}
+
+
+/*int ludo_player::make_decision(){
     //int num_input=fann_get_num_input(ann);
     fann_type input[17];
 
@@ -144,73 +338,9 @@ int ludo_player::make_decision(){
     input[16]=dice_roll;
     // Calculate output
     auto calc_out =tactic->ann.run(input);
-    /*if(calc_out[0]>1 || calc_out[0]<(-1))
-        cout << "###### Dont trust fann ###########" << endl;*/
-    //debug=true;
-    if (debug)
-    {
-        /*cout << "############################### MOVE GETTING DECIDED ###############################" << endl;
-        cout << "Piece pos " << 0 << " " << input[0] << "\n";
-        cout << "Piece pos " << 1 << " " << input[1] << "\n";
-        cout << "Piece pos " << 2 << " " << input[2] << "\n";
-        cout << "Piece pos " << 3 << " " << input[3] << "\n";
-        cout << "Piece nearest opp " << 0 << " " << input[4] << "\n";
-        cout << "Piece nearest opp " << 1 << " " << input[5] << "\n";
-        cout << "Piece nearest opp " << 2 << " " << input[6] << "\n";
-        cout << "Piece nearest opp " << 3 << " " << input[7] << "\n";
-        cout << "Piece nearest star " << 0 << " " << input[8] << "\n";
-        cout << "Piece nearest star " << 1 << " " << input[9] << "\n";
-        cout << "Piece nearest star " << 2 << " " << input[10] << "\n";
-        cout << "Piece nearest star " << 3 << " " << input[11] << "\n";
-        cout << "Piece nearest globe " << 0 << " " << input[12] << "\n";
-        cout << "Piece nearest globe " << 1 << " " << input[13] << "\n";
-        cout << "Piece nearest globe " << 2 << " " << input[14] << "\n";
-        cout << "Piece nearest globe " << 3 << " " << input[15] << "\n";
-        cout << "Dice roll " << input[16] << "\n";
-        cout << "\n Output is: " << calc_out[0] << endl;*/
-    }
-    if(calc_out[0]>calc_out[1] && calc_out[0]>calc_out[2] && calc_out[0]>calc_out[3])
-    {
-        return 0;
-    }
-    else if(calc_out[1]>calc_out[0] && calc_out[1]>calc_out[2] && calc_out[1]>calc_out[3])
-    {
-        return 1;
-    }
-    else if(calc_out[2]>calc_out[0] && calc_out[2]>calc_out[1] && calc_out[2]>calc_out[3])
-    {
-        return 2;
-    }
-    else if(calc_out[3]>calc_out[0] && calc_out[3]>calc_out[2] && calc_out[3]>calc_out[1])
-    {
-        return 3;
-    }
-    /*if(calc_out[0] < -0.5 )
-    {
-        if(debug)
-            std::cout << calc_out[0] << " and we choose 0" << std::endl;
-        return 0;
-    }
-    else if(calc_out[0] > -0.5 && calc_out[0]<0)
-    {
-        if(debug)
-            std::cout << calc_out[0] << " and we choose 1" << std::endl;
-        return 1;
-    }
-    else if(calc_out[0]>0 && calc_out[0]<0.5)
-    {
-        if(debug)
-            std::cout << calc_out[0] << " and we choose 2" << std::endl;
-        return 2;
-    }
-    else if(calc_out[0]>0.5)
-    {
-        if(debug)
-            std::cout << calc_out[0] << " and we choose 3" << std::endl;
-        return 3;
-    }*/
+
     return -1;
-}
+}*/
 
 
 void ludo_player::start_turn(positions_and_dice relative){
