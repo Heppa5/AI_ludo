@@ -83,7 +83,7 @@ public:
     }
 
     vector<int> genes;
-
+    connection* con;
     neural_net ann;
 
 private:
@@ -91,11 +91,12 @@ private:
     int resolution,connum,evaluation,generation,wins;
     double min_weight_value,max_weight_value,range_weights;
 
-    connection* con;
 
+
+    float percent_noise=0.2;
 
     const unsigned int num_layers=3;
-    const unsigned int layers[3]={7,10,1};
+    const unsigned int layers[3]={9,13,1};
 
 };
 

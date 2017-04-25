@@ -43,6 +43,9 @@ ludo_player::ludo_player():
  * Do I get to a Globe?
  * Do I enter goal if I move?
  * Is there a opponent piece, which can send me home and can my dice roll put me away from danger?
+ * Am I on a globe?
+ * Can I get to a friendly piece?
+ *
  */
 
 
@@ -64,7 +67,7 @@ int ludo_player::make_decision(){
         }
         if(pos_start_of_turn[piece] != 99 && (pos_start_of_turn[piece] !=-1 || dice_roll==6 ))
         {
-            fann_type input[7];
+            fann_type input[9];
 
             // can I get out?
             if(pos_start_of_turn[piece]==-1 && dice_roll==6)
@@ -160,6 +163,28 @@ int ludo_player::make_decision(){
                     }
                 }
             }
+
+            // Am I on a globe?
+            input[7]=0;
+            if(pos_start_of_turn[piece]!=-1 && pos_start_of_turn[piece]<52)
+            {
+                if(pos_start_of_turn[piece]% 13 == 0 || (pos_start_of_turn[piece] - 8) % 13 == 0 )
+                {
+                    input[7]=1;
+                }
+            }
+            // Can I get to a friendly piece?
+            input[8] = 0;
+            if(pos_start_of_turn[piece]!=-1 && pos_start_of_turn[piece]<52)
+            {
+                for(int i=0; i<4 ; i++)
+                {
+                    if(pos_start_of_turn[piece]+dice_roll==pos_start_of_turn[i])
+                    {
+                        input[8]=1;
+                    }
+                }
+            }
             if(debug)
             {
                cout << " * Can I get out? \t\t\t" << input[0] << endl;
@@ -169,6 +194,9 @@ int ludo_player::make_decision(){
                cout << " * Do I get to a Globe? \t\t" << input[4] << endl;
                cout << " * Do I enter goal if I move? \t\t" << input[5] << endl;
                cout << " * Is there a opponent piece, which can send me home?  \t\t" << input[6] << endl;
+
+               cout << " * Am I on a globe? \t \t" << input[7] << endl;
+               cout << " * Can I get to a friendly piece? \t \t" << input[8] << endl;
             }
             auto result=tactic->ann.run(input);
             results.push_back(result[0]);
@@ -184,7 +212,9 @@ int ludo_player::make_decision(){
             results.push_back(0.0);
         }
     }
-    double highest=0;
+    if(debug)
+        cout << "Now we find highest result" << endl;
+    double highest=-1;
     vector<int> index;
     for(int i=0; i<results.size();i++)
     {
@@ -199,6 +229,8 @@ int ludo_player::make_decision(){
             index.push_back(i);
         }
     }
+    if(debug)
+        cout << "Now we choose a piece from "<< index.size() << " Pieces"<< endl;
     int piece_to_move=-1;
     if(index.size()>1)
     {

@@ -8,8 +8,8 @@ individual::individual()
 individual::individual(double min_weig, double max_weig, int reso, int gene)
 {
     ann.create_standard_array(num_layers,layers);
-    ann.set_activation_function_hidden(SIGMOID);
-    ann.set_activation_function_output(SIGMOID);
+    ann.set_activation_function_hidden(SIGMOID_SYMMETRIC);
+    ann.set_activation_function_output(SIGMOID_SYMMETRIC);
 
     min_weight_value=min_weig;
     max_weight_value=max_weig;
@@ -25,7 +25,7 @@ individual::individual(double min_weig, double max_weig, int reso, int gene)
 }
 
 
-vector<individual*> individual::make_two_children(individual *mother, int cur_gen){
+/*vector<individual*> individual::make_two_children(individual *mother, int cur_gen){
     random_device gen;
     bool debug=false;
     std::uniform_int_distribution<> dis(0, pow(2,resolution)-1);
@@ -73,7 +73,7 @@ vector<individual*> individual::make_two_children(individual *mother, int cur_ge
     two_children.push_back(children1);
     two_children.push_back(children2);
     return two_children;
-}
+}*/
 
 void individual::adjust_weights_to_resolution(){
 
@@ -142,7 +142,7 @@ void individual::generate_connections_from_genes()
     ann.set_weight_array(con,connum);
 }
 
-void individual::true_random_weights()
+/*void individual::true_random_weights()
 {
     random_device gen;
     std::uniform_int_distribution<> dis(0, pow(2,resolution)-1);
@@ -153,6 +153,52 @@ void individual::true_random_weights()
         con[i].weight = (min_weight_value+range_weights*random_number*1/pow(2,resolution));
     }
     ann.set_weight_array(con,connum);
+}*/
+
+void individual::true_random_weights()
+{
+    random_device gen;
+    std::uniform_real_distribution<> dis(min_weight_value, max_weight_value);
+
+    for (int i=0; i< connum ; i++)
+    {
+        double random_number = dis(gen);
+        con[i].weight = random_number;
+    }
+    ann.set_weight_array(con,connum);
+}
+
+vector<individual*> individual::make_two_children(individual *mother, int cur_gen){
+    random_device gen;
+    bool debug=false;
+    std::uniform_int_distribution<> dis(0, 1);
+
+    individual* children1 = new individual(min_weight_value,max_weight_value, resolution, cur_gen);
+    individual* children2 = new individual(min_weight_value,max_weight_value, resolution, cur_gen);
+
+    for(int i=0; i< connum ; i++) // bit 1 -> take fathers gen to children1  / bit 0 -> take fathers gene to children2
+    {
+        unsigned int bit= dis(gen);
+        if(bit==1)
+        {
+            std::uniform_real_distribution<> dis_father(con[i].weight-con[i].weight*percent_noise, con[i].weight+con[i].weight*percent_noise);
+            std::uniform_real_distribution<> dis_mother(mother->con[i].weight-mother->con[i].weight*percent_noise, mother->con[i].weight+con[i].weight*percent_noise);
+            children1->con[i].weight = dis_father(gen);
+            children2->con[i].weight = dis_mother(gen);
+        }
+        else
+        {
+            std::uniform_real_distribution<> dis_father(con[i].weight-con[i].weight*percent_noise, con[i].weight+con[i].weight*percent_noise);
+            std::uniform_real_distribution<> dis_mother(mother->con[i].weight-mother->con[i].weight*percent_noise, mother->con[i].weight+con[i].weight*percent_noise);
+            children1->con[i].weight = dis_mother(gen);
+            children2->con[i].weight = dis_father(gen);
+        }
+    }
+
+    vector<individual*> two_children;
+    two_children.push_back(children1);
+    two_children.push_back(children2);
+    return two_children;
 }
 
 /*void individual::true_random_weights()

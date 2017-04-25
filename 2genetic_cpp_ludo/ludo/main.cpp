@@ -20,8 +20,7 @@ Q_DECLARE_METATYPE( positions_and_dice )
 using namespace std;
 using namespace FANN;
 
-const unsigned int num_layers=4;
-const unsigned int layers[4]={17,4,6,4};
+
 
 double max_weight_value=5;
 double min_weight_value=-5;
@@ -52,65 +51,26 @@ int main(int argc, char *argv[]){
     //int connum=0;
 
 
-
+    cout << "Hej"<< endl;
     // initialize population
-    //population_size=20;
+    //population_size=1;
     for(int i=0 ; i<population_size ; i++)
     {
         individual* initialization;
-        if(supervised_learning)
-            initialization= new individual(first_min_weight_value,first_max_weight_value,first_resolution,generation);
-        else
-            initialization= new individual(min_weight_value,max_weight_value,first_resolution,generation);
+        initialization= new individual(min_weight_value,max_weight_value,first_resolution,generation);
         initialization->true_random_weights();
-        // new
-        initialization->ann.set_learning_rate(learning_rate); // standard is 0.7
-        initialization->ann.set_training_algorithm(TRAIN_INCREMENTAL); // standard is: TRAIN_RPROP
-        initialization->ann.set_train_error_function(ERRORFUNC_LINEAR); // Standard is: ERRORFUNC_TANH    -  TANH not recommended for incremental training
-        initialization->ann.set_train_stop_function(STOPFUNC_MSE); // standard is: STOPFUNC_MSE
-        // end new
+        //initialization->update_min_max_res(min_weight_value,max_weight_value,resolution);
+        //initialization->adjust_weights_to_resolution();
+        //initialization->convert_connections_to_genes();
         population.push_back(initialization);
 
-    }
-    train_population(&population);
-    update_max_min_weights(&population,&min_weight_value,&max_weight_value,resolution);
-    if(supervised_learning)
-    {
-        train_population(&population);
-        update_max_min_weights(&population,&min_weight_value,&max_weight_value,resolution);
-    }
-
-
-    //while(true){};
-
-   /* double low=99;
-    double high=-99;
-    // search for new high / low values after training
-    for(int i=0 ; i<population_size ; i++)
-    {
-        vector<double> weights=population[i]->get_low_high_weight();
-        if(weights[0]<low)
-            low=weights[0];
-        if(weights[1]>high)
-            high=weights[1];
-    }
-    min_weight_value = low -2;
-    max_weight_value = high +2;*/
-
-    // use the new high/low values to update genes
-    for(int i=0 ; i<population_size ; i++)
-    {
-        population[i]->update_min_max_res(min_weight_value,max_weight_value,resolution);
-        population[i]->adjust_weights_to_resolution();
-        population[i]->convert_connections_to_genes();
-        //population[i]->update_con_matrix();
     }
 
     int connum=population[0]->ann.get_total_connections();
 
     generation++;
     bool done=false;
-    int highest_win_overall=3;
+    int highest_win_overall=60;
     while(done==false)
     {
         cout << "################################# Generation: " << generation << " ##############################" << endl;
@@ -141,27 +101,6 @@ int main(int argc, char *argv[]){
             children.push_back(two_children[1]);
         }
 
-        // new
-        if(supervised_learning)
-        {
-            for(int i=0; i<children.size() ; i++)
-            {
-
-                vector<double> hej=children[0]->get_low_high_weight();
-                cout << "Children " << i << "\t" << hej[0] << "\t" << hej[1]<< endl;
-            }
-
-
-            for(int i=0; i<children.size() ; i++)
-            {
-                children[i]->ann.set_learning_rate(learning_rate); // standard is 0.7
-                children[i]->ann.set_training_algorithm(TRAIN_INCREMENTAL); // standard is: TRAIN_RPROP
-                children[i]->ann.set_train_error_function(ERRORFUNC_LINEAR); // Standard is: ERRORFUNC_TANH    -  TANH not recommended for incremental training
-                children[i]->ann.set_train_stop_function(STOPFUNC_MSE); // standard is: STOPFUNC_MSE
-            }
-        }
-        // end new
-
         int highest=-999;
         int highest_win=0;
         int total=0;
@@ -184,14 +123,7 @@ int main(int argc, char *argv[]){
         {
             population[highest_win_index]->ann.save("The_best_net.net");
         }
-        if(supervised_learning)
-        {
-            cout << "################### BEFORE TRAINING ######################## "<< endl;
-            update_max_min_weights(&children,&min_weight_value,&max_weight_value,resolution);
-            train_population(&children);
-            cout << "################### AFTER TRAINING ######################## "<< endl;
-            update_max_min_weights(&children,&min_weight_value,&max_weight_value,resolution);
-        }
+
         for(int i=0; i< children.size() ; i++)
         {
             children[i]->set_wins(0);
@@ -201,10 +133,7 @@ int main(int argc, char *argv[]){
         }
 
         select_best_offspring(&population,&children,generation,connum,resolution,min_weight_value,max_weight_value);
-        if(supervised_learning)
-        {
-            update_max_min_weights(&population,&min_weight_value,&max_weight_value,resolution);
-        }
+
 
         generation++;
     }
