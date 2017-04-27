@@ -92,11 +92,11 @@ private:
     double min_weight_value,max_weight_value,range_weights;
 
 
-
-    float percent_noise=0.2;
+    double minimum_noise=0.1;
+    double percent_noise=0.2;
 
     const unsigned int num_layers=3;
-    const unsigned int layers[3]={9,13,1};
+    const unsigned int layers[3]={11,13,1};
 
 };
 

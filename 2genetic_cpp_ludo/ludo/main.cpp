@@ -65,7 +65,7 @@ int main(int argc, char *argv[]){
         population.push_back(initialization);
 
     }
-
+    cout << "Hej"<< endl;
     int connum=population[0]->ann.get_total_connections();
 
     generation++;
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]){
         vector<int> parents;
         for(int i=0; i<population.size()/2 ; i++)
         {
-            vector<int> two_parents = selection_roulette_method(&population);
+            vector<int> two_parents = selection_roulette_method(&population,number_of_games_per_individual);
             parents.push_back(two_parents[0]);
             parents.push_back(two_parents[1]);
         }
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]){
         }
 
         select_best_offspring(&population,&children,generation,connum,resolution,min_weight_value,max_weight_value);
-
+        update_max_min_weights(&population,&min_weight_value,&max_weight_value,resolution);
 
         generation++;
     }

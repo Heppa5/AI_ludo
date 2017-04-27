@@ -178,23 +178,32 @@ vector<individual*> individual::make_two_children(individual *mother, int cur_ge
 
     for(int i=0; i< connum ; i++) // bit 1 -> take fathers gen to children1  / bit 0 -> take fathers gene to children2
     {
+        double noise_father=abs(con[i].weight*percent_noise);
+        double noise_mother=abs(mother->con[i].weight*percent_noise);
+        if(noise_mother<minimum_noise)
+        {
+            noise_mother=minimum_noise;
+        }
+        if(noise_father<minimum_noise)
+        {
+            noise_father=minimum_noise;
+        }
+        std::uniform_real_distribution<> dis_father(con[i].weight-noise_father, con[i].weight+noise_father);
+        std::uniform_real_distribution<> dis_mother(mother->con[i].weight-noise_mother, mother->con[i].weight+noise_mother);
         unsigned int bit= dis(gen);
         if(bit==1)
         {
-            std::uniform_real_distribution<> dis_father(con[i].weight-con[i].weight*percent_noise, con[i].weight+con[i].weight*percent_noise);
-            std::uniform_real_distribution<> dis_mother(mother->con[i].weight-mother->con[i].weight*percent_noise, mother->con[i].weight+con[i].weight*percent_noise);
             children1->con[i].weight = dis_father(gen);
             children2->con[i].weight = dis_mother(gen);
         }
         else
         {
-            std::uniform_real_distribution<> dis_father(con[i].weight-con[i].weight*percent_noise, con[i].weight+con[i].weight*percent_noise);
-            std::uniform_real_distribution<> dis_mother(mother->con[i].weight-mother->con[i].weight*percent_noise, mother->con[i].weight+con[i].weight*percent_noise);
             children1->con[i].weight = dis_mother(gen);
             children2->con[i].weight = dis_father(gen);
         }
     }
-
+    children1->ann.set_weight_array(children1->con,connum);
+    children2->ann.set_weight_array(children2->con,connum);
     vector<individual*> two_children;
     two_children.push_back(children1);
     two_children.push_back(children2);

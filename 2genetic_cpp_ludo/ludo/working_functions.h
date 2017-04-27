@@ -69,16 +69,16 @@ void update_max_min_weights(vector<individual*> *pop, double *min_weight_value, 
         if(weights[1]>high)
             high=weights[1];
     }
-    *min_weight_value = low - 2;
-    *max_weight_value = high +2;
+    *min_weight_value = low;
+    *max_weight_value = high;
     cout << low << " " << high << endl;
     cout << *min_weight_value << " " << *max_weight_value << endl;
     // use the new high/low values to update genes
     for(int i=0 ; i<population.size() ; i++)
     {
         population[i]->update_min_max_res(*min_weight_value,*max_weight_value,resolution);
-        population[i]->adjust_weights_to_resolution();
-        population[i]->convert_connections_to_genes();
+        /*population[i]->adjust_weights_to_resolution();
+        population[i]->convert_connections_to_genes();*/
         //population[i]->update_con_matrix();
     }
 }
@@ -110,7 +110,7 @@ void evaluation_function(game *g,QApplication* a, individual* tactic, ludo_playe
         }
         if(g->winner==0)
            tactic->set_wins(tactic->get_wins()+1);
-
+        //cout << "HAd a winner" << endl;
         g->reset();
         if(g->wait()){}
 
@@ -120,22 +120,29 @@ void evaluation_function(game *g,QApplication* a, individual* tactic, ludo_playe
     tactic->set_evaluation(tactic->get_wins()*1);
 }
 
-vector<int > selection_roulette_method(vector<individual*> *population)
+vector<int > selection_roulette_method(vector<individual*> *population,int number_of_games)
 {
     random_device gen;
     bool debug =false;
     vector<individual*>& vecRef = *population; // vector is not copied here
 
     // create roulette wheel
-
+    int total=0;
+    for(int i=0; i < vecRef.size() ; i++)
+    {
+        //cout << "Wow ow" <<vecRef[i]->get_evaluation() << endl;
+        total=total+vecRef[i]->get_evaluation();
+    }
+    total=total/vecRef.size();
+    //cout << total << endl;
     vector<int> roulette;
     int more_than_one=0;
     for(int i=0; i<vecRef.size();i++)
     {
-        if(vecRef[i]->get_evaluation()>0)
+        if(vecRef[i]->get_evaluation()-total>0)
         {
             more_than_one++;
-            for(int j=0; j<vecRef[i]->get_evaluation();j++)
+            for(int j=0; j<(vecRef[i]->get_evaluation()-total);j++)
             {
                 roulette.push_back(i);
             }
@@ -172,7 +179,7 @@ vector<int > selection_roulette_method(vector<individual*> *population)
                 cout << "Deleting father index: " << father_index_population << " and random number was: " << father_index_roulette << "\n So we're deleting from " << i << " to " << i + vecRef[father_index_population]->get_evaluation() << endl;
                 //cout << roulette[i + vecRef[father_index_population].evaluation-1] << endl;
             }
-            roulette.erase(roulette.begin() + i, roulette.begin() + i + vecRef[father_index_population]->get_evaluation()-1);
+            roulette.erase(roulette.begin() + i, roulette.begin() + i + vecRef[father_index_population]->get_evaluation()-total-1);
             break;
         }
     }
@@ -196,7 +203,7 @@ void select_best_offspring(vector<individual*>* pop, vector<individual*>* child,
     std::sort(population.begin(), population.end(), compareBySize);
     std::sort(children.begin(), children.end(), compareBySize);
 
-    int number_of_random_each_generation=10;
+    int number_of_random_each_generation=0;
     for(int i=0 ; i<number_of_random_each_generation ; i++)
     {
         individual* initialization= new individual(min_weight_value,max_weight_value,resolution,generation);
@@ -217,7 +224,7 @@ void select_best_offspring(vector<individual*>* pop, vector<individual*>* child,
     {
         //cout <<(children[i]->get_evaluation() > population[population.size()-1-number_of_random_each_generation-i]->get_evaluation()) << endl;
         //cout << children[i]->get_evaluation() << "\t hej " << population[population.size()-1-number_of_random_each_generation-i]->get_evaluation()  << endl;
-        if(children[i]->get_evaluation()-4 > population[population.size()-1-number_of_random_each_generation-i]->get_evaluation())
+        if(children[i]->get_evaluation() > population[population.size()-1-number_of_random_each_generation-i]->get_evaluation())
         {
             cout << "Success - better child \n" << " Child evaluation was: " << children[i]->get_evaluation() << " individual evaluation was: " << population[population.size()-1-i-number_of_random_each_generation]->get_evaluation()<< endl;
             delete population[population.size()-1-number_of_random_each_generation-i];

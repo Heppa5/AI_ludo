@@ -42,10 +42,13 @@ ludo_player::ludo_player():
  * Do I get to a star?
  * Do I get to a Globe?
  * Do I enter goal if I move?
- * Is there a opponent piece, which can send me home and can my dice roll put me away from danger?
+ *
  * Am I on a globe?
  * Can I get to a friendly piece?
- *
+ * Am I'm safe? (are there a friendly piece at my position)? **
+ * Is there a opponent piece, which can send me home and can my dice roll put me away from danger?
+ * -> start_position - how many opponents are 5 fields behind me?
+ * -> start_position + dice_roll - how many opponents are 5 fields behind me?
  */
 
 
@@ -67,7 +70,7 @@ int ludo_player::make_decision(){
         }
         if(pos_start_of_turn[piece] != 99 && (pos_start_of_turn[piece] !=-1 || dice_roll==6 ))
         {
-            fann_type input[9];
+            fann_type input[11];
 
             // can I get out?
             if(pos_start_of_turn[piece]==-1 && dice_roll==6)
@@ -147,56 +150,91 @@ int ludo_player::make_decision(){
                 input[5]=0;
             }
 
-            //Is there a opponent piece, which can send me home and can my dice roll put me away from danger?
-            input[6]=0;
-            if(pos_start_of_turn[piece] != -1 && pos_start_of_turn[piece] <= 52)
-            {
-                int position_to_check = pos_start_of_turn[piece] -6 +dice_roll;
-                for(int opponent=4; opponent < 16 ; opponent++)
-                {
-                    if(pos_start_of_turn[opponent]>position_to_check && pos_start_of_turn[opponent]<pos_start_of_turn[piece])
-                        input[6]=1;
-                    else if(position_to_check<0)
-                    {
-                        if( (pos_start_of_turn[opponent]>=52-position_to_check && pos_start_of_turn[opponent]<52) || pos_start_of_turn[opponent]<pos_start_of_turn[piece] && pos_start_of_turn[opponent] >=0 )
-                            input[6]=1;
-                    }
-                }
-            }
-
             // Am I on a globe?
-            input[7]=0;
+            input[6]=0;
             if(pos_start_of_turn[piece]!=-1 && pos_start_of_turn[piece]<52)
             {
                 if(pos_start_of_turn[piece]% 13 == 0 || (pos_start_of_turn[piece] - 8) % 13 == 0 )
                 {
-                    input[7]=1;
+                    input[6]=1;
                 }
             }
             // Can I get to a friendly piece?
-            input[8] = 0;
+            input[7] = 0;
             if(pos_start_of_turn[piece]!=-1 && pos_start_of_turn[piece]<52)
             {
                 for(int i=0; i<4 ; i++)
                 {
                     if(pos_start_of_turn[piece]+dice_roll==pos_start_of_turn[i])
                     {
+                        input[7]=1;
+                    }
+                }
+            }
+            //Am I'm safe? (are there a friendly piece at my position)?
+            input[8] = 0;
+            for(int i=0 ; i<4 ; i++)
+            {
+                if(i!=piece && (pos_start_of_turn[piece] != -1 ||pos_start_of_turn[piece] != 99) )
+                {
+                    if(pos_start_of_turn[piece]==pos_start_of_turn[i])
+                    {
                         input[8]=1;
                     }
                 }
             }
+
+            //* -> start_position - how many opponents are 5 fields behind me?
+            input[9]=0;
+            double count=0;
+            if(pos_start_of_turn[piece] != -1 && pos_start_of_turn[piece] < 52)
+            {
+                for(int opponent=4; opponent < 16 ; opponent++)
+                {
+                    int position_to_check = pos_start_of_turn[piece]-6;
+                    if(pos_start_of_turn[opponent]>position_to_check && pos_start_of_turn[opponent]<pos_start_of_turn[piece])
+                        count++;
+                    else if(position_to_check<0)
+                    {
+                        if( (pos_start_of_turn[opponent]>=52-position_to_check && pos_start_of_turn[opponent]<52) || pos_start_of_turn[opponent]<pos_start_of_turn[piece] && pos_start_of_turn[opponent] >=0 )
+                            count++;
+                    }
+                }
+            }
+            input[9]=(double)(count/6.00);
+
+            //* -> start_position + dice_roll - how many opponents are 5 fields behind me?
+            input[10]=0;
+            count=0;
+            if(pos_start_of_turn[piece] != -1 && pos_start_of_turn[piece] < 52)
+            {
+                for(int opponent=4; opponent < 16 ; opponent++)
+                {
+                    int position_to_check = pos_start_of_turn[piece]-6+dice_roll;
+                    if(pos_start_of_turn[opponent]>position_to_check && pos_start_of_turn[opponent]<pos_start_of_turn[piece])
+                        count++;
+                    else if(position_to_check<0)
+                    {
+                        if( (pos_start_of_turn[opponent]>=52-position_to_check && pos_start_of_turn[opponent]<52) || pos_start_of_turn[opponent]<pos_start_of_turn[piece] && pos_start_of_turn[opponent] >=0 )
+                            count++;
+                    }
+                }
+            }
+            input[10]=(double)(count/6.00);
+
             if(debug)
             {
                cout << " * Can I get out? \t\t\t" << input[0] << endl;
-               cout << " * Do I get send home if I move? \t" << input[1] << endl;
-               cout << " * Can I send an opponent home? \t" << input[2] << endl;
-               cout << " * Do I get to a star? \t\t\t" << input[3] << endl;
-               cout << " * Do I get to a Globe? \t\t" << input[4] << endl;
-               cout << " * Do I enter goal if I move? \t\t" << input[5] << endl;
-               cout << " * Is there a opponent piece, which can send me home?  \t\t" << input[6] << endl;
-
-               cout << " * Am I on a globe? \t \t" << input[7] << endl;
-               cout << " * Can I get to a friendly piece? \t \t" << input[8] << endl;
+               cout << " * Do I get send home if I move? \t \t" << input[1] << endl;
+               cout << " * Can I send an opponent home? \t \t" << input[2] << endl;
+               cout << " * Do I get to a star? \t\t\t \t" << input[3] << endl;
+               cout << " * Do I get to a Globe? \t\t \t" << input[4] << endl;
+               cout << " * Do I enter goal if I move? \t\t \t" << input[5] << endl;
+               cout << " * Am I on a globe? \t \t \t" << input[6] << endl;
+               cout << " * Can I get to a friendly piece? \t \t \t" << input[7] << endl;
+               cout << " * Are there a friendly piece at my position \t \t " << input[8] << endl;
+               cout << " * start_position - how many opponents are 5 fields behind me? \t " << input[9] << endl;
+               cout << " * start_position + dice_roll - how many opponents are 5 fields behind me?" << input[10] << endl;
             }
             auto result=tactic->ann.run(input);
             results.push_back(result[0]);
