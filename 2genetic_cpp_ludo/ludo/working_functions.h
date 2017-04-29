@@ -238,5 +238,44 @@ void select_best_offspring(vector<individual*>* pop, vector<individual*>* child,
     }
 }
 
+vector<int> rank_selection_method(vector<individual*>* pop)
+{
+    vector<individual*>& population = *pop;
+    std::sort(population.begin(), population.end(), compareBySize);
+
+    vector<int> roulette;
+
+    // fill up roulette
+    for(int i=0; i<population.size() ; i++)
+    {
+        for(int j=0; j<population.size()-i ; j++)
+        {
+            roulette.push_back(i);
+        }
+    }
+
+    random_device gen;
+    std::uniform_int_distribution<> dis(0, roulette.size()-1);
+
+    int father_roulette_index=dis(gen);
+    int father_index=roulette[father_roulette_index];
+
+    for(int i = 0 ; i < roulette.size() ; i++)
+    {
+        if ( roulette[i]==father_index)
+        {
+           roulette.erase(roulette.begin() + i, roulette.begin() + i + (population.size()-father_index)-1);
+        }
+    }
+
+    std::uniform_int_distribution<> dis2(0, roulette.size()-1);
+    int mother_index_roulette = dis2(gen);
+    int mother_index_population = roulette[mother_index_roulette];
+    vector<int> parents;
+    parents.push_back(father_index);
+    parents.push_back(mother_index_population);
+    return parents;
+}
+
 
 #endif // WORKING_FUNCTIONS_H
