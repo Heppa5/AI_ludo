@@ -17,7 +17,8 @@ SOURCES += main.cpp\
     game.cpp \
     ludo_player.cpp \
     ludo_player_random.cpp \
-    individual.cpp
+    individual.cpp \
+    ludo_player_train.cpp
 
 HEADERS  += dialog.h \
     game.h \
@@ -25,7 +26,8 @@ HEADERS  += dialog.h \
     positions_and_dice.h \
     ludo_player_random.h \
     working_functions.h \
-    individual.h
+    individual.h \
+    ludo_player_train.h
 
 FORMS    += dialog.ui
 

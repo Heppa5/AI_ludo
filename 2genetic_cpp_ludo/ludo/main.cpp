@@ -4,6 +4,7 @@
 #include <vector>
 #include "ludo_player.h"
 #include "ludo_player_random.h"
+#include "ludo_player_train.h"
 #include "positions_and_dice.h"
 
 
@@ -42,14 +43,14 @@ int main(int argc, char *argv[]){
     QApplication a(argc, argv);
     qRegisterMetaType<positions_and_dice>();
     game g;
-    ludo_player p1;
-    ludo_player_random p2,p3, p4;
+    ludo_player_train p1;
+    ludo_player p2,p3, p4;
     Dialog w;
     setup_game(&a,&g,&p1,&p2,&p3,&p4,&w);
     vector<individual*> population;
     int generation=0;
     //int connum=0;
-    bool train=false;
+    bool train=true;
 
 
     if(train==true)

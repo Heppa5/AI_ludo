@@ -2,7 +2,7 @@
 #define WORKING_FUNCTIONS_H
 
 
-void setup_game(QApplication *a, game *g, ludo_player *p1, ludo_player_random *p2, ludo_player_random *p3, ludo_player_random *p4,Dialog *w)
+/*void setup_game(QApplication *a, game *g, ludo_player_train *p1, ludo_player_random *p2, ludo_player_random *p3, ludo_player_random *p4,Dialog *w)
 {
     g->setGameDelay(000); //if you want to see the game, set a delay
     //instanciate the players here
@@ -10,16 +10,57 @@ void setup_game(QApplication *a, game *g, ludo_player *p1, ludo_player_random *p
 
     // Add a GUI <-- remove the '/' to uncomment block
 
-    /*QObject::connect(g,SIGNAL(update_graphics(std::vector<int>)),w,SLOT(update_graphics(std::vector<int>)));
-    QObject::connect(g,SIGNAL(set_color(int)),                   w,SLOT(get_color(int)));
-    QObject::connect(g,SIGNAL(set_dice_result(int)),             w,SLOT(get_dice_result(int)));
-    QObject::connect(g,SIGNAL(declare_winner(int)),              w,SLOT(get_winner()));
-    QObject::connect(g,SIGNAL(close()),a,SLOT(quit()));
-    w->show();*/
+    //QObject::connect(g,SIGNAL(update_graphics(std::vector<int>)),w,SLOT(update_graphics(std::vector<int>)));
+    //QObject::connect(g,SIGNAL(set_color(int)),                   w,SLOT(get_color(int)));
+    //QObject::connect(g,SIGNAL(set_dice_result(int)),             w,SLOT(get_dice_result(int)));
+    //QObject::connect(g,SIGNAL(declare_winner(int)),              w,SLOT(get_winner()));
+    //QObject::connect(g,SIGNAL(close()),a,SLOT(quit()));
+    //w->show();
     // //Or don't add the GUI
 
     QObject::connect(g,SIGNAL(close()),a,SLOT(quit()));
-    //*/
+    //
+
+    //set up for each player
+    QObject::connect(g, SIGNAL(player1_start(positions_and_dice)),p1,SLOT(start_turn(positions_and_dice)));
+    QObject::connect(p1,SIGNAL(select_piece(int)),                g, SLOT(movePiece(int)));
+    QObject::connect(g, SIGNAL(player1_end(std::vector<int>)),    p1,SLOT(post_game_analysis(std::vector<int>)));
+    QObject::connect(p1,SIGNAL(turn_complete(bool)),              g, SLOT(turnComplete(bool)));
+
+    QObject::connect(g, SIGNAL(player2_start(positions_and_dice)),p2,SLOT(start_turn(positions_and_dice)));
+    QObject::connect(p2,SIGNAL(select_piece(int)),               g, SLOT(movePiece(int)));
+    QObject::connect(g, SIGNAL(player2_end(std::vector<int>)),    p2,SLOT(post_game_analysis(std::vector<int>)));
+    QObject::connect(p2,SIGNAL(turn_complete(bool)),             g, SLOT(turnComplete(bool)));
+
+    QObject::connect(g, SIGNAL(player3_start(positions_and_dice)),p3,SLOT(start_turn(positions_and_dice)));
+    QObject::connect(p3,SIGNAL(select_piece(int)),               g, SLOT(movePiece(int)));
+    QObject::connect(g, SIGNAL(player3_end(std::vector<int>)),    p3,SLOT(post_game_analysis(std::vector<int>)));
+    QObject::connect(p3,SIGNAL(turn_complete(bool)),             g, SLOT(turnComplete(bool)));
+
+    QObject::connect(g, SIGNAL(player4_start(positions_and_dice)),p4,SLOT(start_turn(positions_and_dice)));
+    QObject::connect(p4,SIGNAL(select_piece(int)),               g, SLOT(movePiece(int)));
+    QObject::connect(g, SIGNAL(player4_end(std::vector<int>)),    p4,SLOT(post_game_analysis(std::vector<int>)));
+    QObject::connect(p4,SIGNAL(turn_complete(bool)),             g, SLOT(turnComplete(bool)));
+}*/
+
+void setup_game(QApplication *a, game *g, ludo_player_train *p1, ludo_player *p2, ludo_player *p3, ludo_player *p4,Dialog *w)
+{
+    g->setGameDelay(000); //if you want to see the game, set a delay
+    //instanciate the players here
+
+
+    // Add a GUI <-- remove the '/' to uncomment block
+
+    //QObject::connect(g,SIGNAL(update_graphics(std::vector<int>)),w,SLOT(update_graphics(std::vector<int>)));
+    //QObject::connect(g,SIGNAL(set_color(int)),                   w,SLOT(get_color(int)));
+    //QObject::connect(g,SIGNAL(set_dice_result(int)),             w,SLOT(get_dice_result(int)));
+    //QObject::connect(g,SIGNAL(declare_winner(int)),              w,SLOT(get_winner()));
+    //QObject::connect(g,SIGNAL(close()),a,SLOT(quit()));
+    //w->show();
+    // //Or don't add the GUI
+
+    QObject::connect(g,SIGNAL(close()),a,SLOT(quit()));
+    //
 
     //set up for each player
     QObject::connect(g, SIGNAL(player1_start(positions_and_dice)),p1,SLOT(start_turn(positions_and_dice)));
@@ -84,7 +125,42 @@ void update_max_min_weights(vector<individual*> *pop, double *min_weight_value, 
 }
 
 
-void evaluation_function(game *g,QApplication* a, individual* tactic, ludo_player *p1,uint connum, int number_of_games_per_individual)
+/*void evaluation_function(game *g,QApplication* a, individual* tactic, ludo_player *p1,uint connum, int number_of_games_per_individual)
+{
+
+    p1->change_individual(tactic);
+    //p1->set_weights(population[index].con,connum);
+    for(int j=0 ; j < number_of_games_per_individual ; j++)
+    {
+        g->start();
+        a->exec();
+        while (a->closingDown()){
+        }
+        // ## ################# evaluation function ###########################
+        std::vector<int> player_positions=g->player_positions;
+        for(int h=0; h< 4 ; h++)
+        {
+            if(player_positions[h]==-1 ){
+                tactic->set_evaluation(tactic->get_evaluation() -90);
+                //int wpw=2;
+            }
+            else if(player_positions[h]==99)
+                tactic->set_evaluation(tactic->get_evaluation() +90);
+            else
+                tactic->set_evaluation(tactic->get_evaluation() +player_positions[h]+30);
+        }
+        if(g->winner==0)
+           tactic->set_wins(tactic->get_wins()+1);
+        //cout << "HAd a winner" << endl;
+        g->reset();
+        if(g->wait()){}
+
+    }
+    //tactic->set_evaluation(tactic->get_evaluation() / number_of_games_per_individual);
+    //tactic->set_evaluation(tactic->get_evaluation() + tactic->get_wins()*10);
+    tactic->set_evaluation(tactic->get_wins()*1);
+}*/
+void evaluation_function(game *g,QApplication* a, individual* tactic, ludo_player_train *p1,uint connum, int number_of_games_per_individual)
 {
 
     p1->change_individual(tactic);
